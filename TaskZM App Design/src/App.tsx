@@ -13,7 +13,7 @@ import MobileTodayAgenda from "./components/MobileTodayAgenda";
 import MonthView from "./components/MonthView";
 import { sampleTasks } from "./data/sampleTasks";
 import { Plus } from "lucide-react";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,

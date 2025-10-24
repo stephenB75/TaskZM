@@ -56,9 +56,9 @@
       target: 'esnext',
       outDir: 'build',
     },
-  server: {
-    port: 3000,
-    host: '0.0.0.0',
-    open: true,
-  },
+    server: {
+      port: 3000,
+      host: '0.0.0.0',
+      open: true,
+    },
   });

@@ -1,7 +1,7 @@
 import svgPaths from "../imports/svg-5yy7db8tu3";
 import imgIcon from "figma:asset/963deb7708a8414668396d1993b85035b01204ff.png";
 import { Check, Clock, Play, Pause, Square } from "lucide-react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { timeTracking } from "../lib/timeTracking";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";

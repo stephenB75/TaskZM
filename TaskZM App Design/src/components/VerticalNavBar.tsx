@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Inbox,
   Calendar,
@@ -51,7 +52,8 @@ interface VerticalNavBarProps {
       | "workspaces"
       | "calendar-sync"
       | "notifications"
-      | "custom-views",
+      | "custom-views"
+      | "accessibility",
   ) => void;
   viewMode: "week" | "month";
   onViewModeChange: (mode: "week" | "month") => void;

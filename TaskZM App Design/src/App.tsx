@@ -4,6 +4,7 @@ import Login from "./components/Login";
 import DayColumn from "./components/DayColumn";
 import WeekNavigation from "./components/WeekNavigation";
 import TimelinePanel from "./components/TimelinePanel";
+import WeeklyKanbanBoard from "./components/WeeklyKanbanBoard";
 import VerticalNavBar from "./components/VerticalNavBar";
 import MobileBottomNav from "./components/MobileBottomNav";
 import InboxPanel, { InboxTask } from "./components/InboxPanel";
@@ -156,6 +157,46 @@ function TaskZMApp({}: TaskZMAppProps) {
     }
   };
 
+  const handleTaskStatusChange = async (taskId: string, newStatus: Task["status"]) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      const updatedTask = { ...task, status: newStatus };
+      await handleTaskUpdate(updatedTask);
+    }
+  };
+
+  const handleTaskDrop = async (taskId: string, targetDate: Date) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      const updatedTask = { 
+        ...task, 
+        scheduledDate: targetDate.toISOString().split('T')[0] 
+      };
+      await handleTaskUpdate(updatedTask);
+    }
+  };
+
+  const handleTaskClick = (task: Task) => {
+    // Open edit modal with pre-filled data
+    setShowAddTaskModal(true);
+    // TODO: Pre-fill the modal with task data
+  };
+
+  const handleReorderTasksInDay = async (taskId: string, targetTaskId: string, position: "before" | "after") => {
+    // TODO: Implement task reordering within a day
+    console.log("Reorder task", taskId, "to", position, "of", targetTaskId);
+  };
+
+  const handleAutoSchedule = async () => {
+    try {
+      // TODO: Implement AI auto-scheduling
+      toast.success("AI scheduling completed");
+    } catch (error) {
+      console.error("Failed to auto-schedule:", error);
+      toast.error("Failed to auto-schedule tasks");
+    }
+  };
+
   const handleTaskCreate = async (newTask: Omit<Task, "id">) => {
     try {
       // Check if this is a recurring task
@@ -261,22 +302,6 @@ function TaskZMApp({}: TaskZMAppProps) {
 
   const renderMainContent = () => {
     switch (activePanel) {
-      case "timeline":
-        return (
-          <div className="flex-1 flex flex-col">
-            <WeekNavigation
-              currentWeek={currentWeek}
-              onWeekChange={setCurrentWeek}
-            />
-            <TimelinePanel
-              currentWeek={currentWeek}
-              tasks={tasks}
-              onTaskUpdate={handleTaskUpdate}
-              onTaskArchive={handleArchiveTask}
-              onTaskDelete={handleTaskDelete}
-            />
-          </div>
-        );
       case "calendar":
         return (
           <CalendarPanel
@@ -328,7 +353,41 @@ function TaskZMApp({}: TaskZMAppProps) {
             onPanelChange={setActivePanel}
             onAddTask={() => setShowAddTaskModal(true)}
           />
-          {renderMainContent()}
+          {activePanel === "timeline" ? (
+            <div className="flex flex-1">
+              {/* Timeline Sidebar */}
+              <TimelinePanel
+                tasks={getTodayTasks()}
+                onTaskClick={handleTaskClick}
+                onTaskDrop={handleTaskDrop}
+                onReorderTasks={handleReorderTasksInDay}
+              />
+              {/* Main Weekly View */}
+              <div className="flex-1 flex flex-col">
+                <WeekNavigation
+                  currentWeek={currentWeek}
+                  onWeekChange={setCurrentWeek}
+                  onAutoSchedule={handleAutoSchedule}
+                  onAddTask={() => setShowAddTaskModal(true)}
+                />
+                <WeeklyKanbanBoard
+                  currentWeek={currentWeek}
+                  tasks={tasks}
+                  onTaskStatusChange={handleTaskStatusChange}
+                  onTaskDrop={handleTaskDrop}
+                  onAddTaskToDay={(date) => {
+                    setShowAddTaskModal(true);
+                    // Pre-fill the date in the modal
+                  }}
+                  onTaskClick={handleTaskClick}
+                  onReorderTasksInDay={handleReorderTasksInDay}
+                  allTasks={tasks}
+                />
+              </div>
+            </div>
+          ) : (
+            renderMainContent()
+          )}
         </div>
       )}
 

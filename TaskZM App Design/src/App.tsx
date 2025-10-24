@@ -30,6 +30,7 @@ import {
 import { TagDefinition } from "./components/TagManager";
 import { tasksApi } from "./lib/api";
 import { generateRecurringTasks, validateRecurringConfig } from "./lib/recurringTasks";
+import { aiAutoSchedule, aiSmartSchedule, validateAIScheduleConfig } from "./lib/aiScheduler";
 
 interface Task {
   id: string;
@@ -189,8 +190,50 @@ function TaskZMApp({}: TaskZMAppProps) {
 
   const handleAutoSchedule = async () => {
     try {
-      // TODO: Implement AI auto-scheduling
-      toast.success("AI scheduling completed");
+      // Get inbox tasks
+      const inboxTasks = getInboxTasks();
+      
+      // Validate configuration
+      const totalTasks = tasks.filter(t => !t.archived && (t.status === 'todo' || t.status === 'inprogress')).length + inboxTasks.length;
+      const validationErrors = validateAIScheduleConfig(6, totalTasks);
+      
+      if (validationErrors.length > 0) {
+        toast.error(`Scheduling validation failed: ${validationErrors.join(", ")}`);
+        return;
+      }
+      
+      // Run AI auto-scheduling
+      const result = aiAutoSchedule({
+        tasksPerDayLimit: 6,
+        currentWeek,
+        tasks,
+        inboxTasks,
+      });
+      
+      // Update tasks with new schedules
+      const updatedTasks = tasks.map(task => {
+        const scheduledTask = result.scheduledTasks.find(st => st.id === task.id);
+        return scheduledTask || task;
+      });
+      
+      // Add newly scheduled inbox tasks
+      const newScheduledTasks = result.scheduledTasks.filter(st => 
+        !tasks.find(t => t.id === st.id)
+      );
+      
+      setTasks([...updatedTasks, ...newScheduledTasks]);
+      
+      // Clear inbox if it was cleared
+      if (result.inboxCleared) {
+        setInboxTasks([]);
+      }
+      
+      // Show success message
+      const weekText = result.weeksUsed === 1 ? 'week' : 'weeks';
+      toast.success(
+        `AI scheduling completed! Scheduled ${result.tasksScheduled} tasks across ${result.weeksUsed} ${weekText}`
+      );
+      
     } catch (error) {
       console.error("Failed to auto-schedule:", error);
       toast.error("Failed to auto-schedule tasks");

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { aiSmartSchedule } from "../lib/aiScheduler";
 import {
   Dialog,
   DialogContent,
@@ -198,6 +199,31 @@ export default function AddTaskModal({
 
     if (!formData.title.trim()) return;
 
+    // If AI scheduling is enabled, find the best date
+    let scheduledDate = formData.scheduledDate;
+    if (useAiSchedule && !editingTask) {
+      const bestDate = aiSmartSchedule(
+        {
+          title: formData.title,
+          description: formData.description,
+          tags: formData.selectedTags,
+          priority: formData.priority,
+          assignee: formData.assignee,
+          dueDate: formData.dueDate,
+          status: formData.status,
+          notes: formData.notes,
+          dependencies: formData.dependencies.length > 0 ? formData.dependencies : undefined,
+        } as Task,
+        allTasks,
+        currentWeek,
+        6
+      );
+      
+      if (bestDate) {
+        scheduledDate = bestDate;
+      }
+    }
+
     const taskData: Omit<Task, "id"> = {
       title: formData.title,
       description: formData.description,
@@ -205,7 +231,7 @@ export default function AddTaskModal({
       priority: formData.priority,
       assignee: formData.assignee,
       dueDate: formData.dueDate,
-      scheduledDate: formData.scheduledDate,
+      scheduledDate: scheduledDate,
       scheduledTime: formData.scheduledTime || undefined,
       status: formData.status,
       notes: formData.notes || undefined,

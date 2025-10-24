@@ -94,7 +94,7 @@ export default function VerticalNavBar({
   ];
 
   return (
-    <div className="w-16 h-screen flex-shrink-0 bg-white border-r border-[#e3e3e3] flex flex-col items-center py-6 gap-4">
+    <div className="w-20 h-screen flex-shrink-0 bg-white border-r border-[#e3e3e3] flex flex-col items-center py-6 gap-4">
       {navItems.map((item) => {
         const Icon = item.icon;
         let isActive = activePanel === item.id;

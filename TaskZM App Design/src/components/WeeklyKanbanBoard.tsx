@@ -99,7 +99,7 @@ export default function WeeklyKanbanBoard({
     const isToday = date.getTime() === today.getTime();
     
     return (
-      <div className={`text-center py-2 ${isToday ? 'bg-blue-50' : ''}`}>
+      <div className={`text-center py-2.5 ${isToday ? 'bg-blue-50' : ''}`}>
         <div className={`text-xs font-medium text-gray-500 uppercase tracking-wide ${isToday ? 'text-blue-600' : ''}`}>
           {dayName}
         </div>
@@ -149,7 +149,7 @@ export default function WeeklyKanbanBoard({
             {weekDays.map((day, index) => (
               <div
                 key={index}
-                className="w-80 flex-shrink-0 border-r border-gray-200"
+                className="w-[280px] flex-shrink-0 border-r border-gray-200"
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, day)}
               >
@@ -184,7 +184,7 @@ export default function WeeklyKanbanBoard({
             return (
               <div
                 key={dayIndex}
-                className="w-80 flex-shrink-0 border-r border-gray-200 bg-white"
+                className="w-[280px] flex-shrink-0 border-r border-gray-200 bg-white"
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, day)}
               >
@@ -201,7 +201,7 @@ export default function WeeklyKanbanBoard({
                   </div>
 
                   {/* Tasks for this day */}
-                  <div className="flex-1 p-2 space-y-2 overflow-y-auto">
+                  <div className="flex-1 p-3 space-y-2 overflow-y-auto">
                     {dayTasks.length === 0 ? (
                       <div className="text-center py-8 text-gray-400 text-sm">
                         No tasks scheduled

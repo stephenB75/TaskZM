@@ -45,6 +45,11 @@ interface Task {
   status: "todo" | "inprogress" | "done";
   scheduledDate: string;
   scheduledTime?: string;
+  subtasks?: Array<{
+    id: string;
+    text: string;
+    completed: boolean;
+  }>;
   dependencies?: string[];
   recurring?: {
     frequency: "daily" | "weekly" | "monthly";
@@ -125,6 +130,11 @@ export default function AddTaskModal({
       fontWeight: "bold" | "medium";
     }>,
     dependencies: [] as string[],
+    subtasks: [] as Array<{
+      id: string;
+      text: string;
+      completed: boolean;
+    }>,
   });
 
   const [useAiSchedule, setUseAiSchedule] = useState(false);
@@ -156,6 +166,7 @@ export default function AddTaskModal({
         notes: editingTask.notes || "",
         selectedTags: editingTask.tags,
         dependencies: editingTask.dependencies || [],
+        subtasks: editingTask.subtasks || [],
       });
       // Reset AI schedule and recurring toggles when loading edit task
       setUseAiSchedule(false);
@@ -235,6 +246,7 @@ export default function AddTaskModal({
       scheduledTime: formData.scheduledTime || undefined,
       status: formData.status,
       notes: formData.notes || undefined,
+      subtasks: formData.subtasks.length > 0 ? formData.subtasks : undefined,
       dependencies:
         formData.dependencies.length > 0
           ? formData.dependencies
@@ -289,6 +301,7 @@ export default function AddTaskModal({
       notes: "",
       selectedTags: [],
       dependencies: [],
+      subtasks: [],
     });
     setUseAiSchedule(false);
     setIsRecurring(false);
@@ -378,6 +391,44 @@ export default function AddTaskModal({
       return task.status !== "done";
     },
   );
+
+  // Subtasks management functions
+  const addSubtask = () => {
+    const newSubtask = {
+      id: `subtask-${Date.now()}`,
+      text: "",
+      completed: false,
+    };
+    setFormData((prev) => ({
+      ...prev,
+      subtasks: [...prev.subtasks, newSubtask],
+    }));
+  };
+
+  const updateSubtask = (id: string, text: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      subtasks: prev.subtasks.map((subtask) =>
+        subtask.id === id ? { ...subtask, text } : subtask
+      ),
+    }));
+  };
+
+  const toggleSubtaskCompletion = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      subtasks: prev.subtasks.map((subtask) =>
+        subtask.id === id ? { ...subtask, completed: !subtask.completed } : subtask
+      ),
+    }));
+  };
+
+  const removeSubtask = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      subtasks: prev.subtasks.filter((subtask) => subtask.id !== id),
+    }));
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -992,6 +1043,88 @@ export default function AddTaskModal({
               )}
             </div>
           )}
+
+          {/* Subtasks */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs sm:text-sm">Subtasks</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addSubtask}
+                className="h-7 sm:h-8 text-xs"
+              >
+                <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                Add Subtask
+              </Button>
+            </div>
+            
+            {formData.subtasks.length === 0 ? (
+              <div className="p-3 sm:p-4 text-center border border-dashed border-[#e3e3e3] rounded-lg">
+                <p className="text-xs sm:text-sm text-[#828282]">
+                  No subtasks added yet
+                </p>
+                <p className="text-[10px] sm:text-xs text-[#828282] mt-1">
+                  Break down complex tasks into smaller steps
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {formData.subtasks.map((subtask, index) => (
+                  <div
+                    key={subtask.id}
+                    className="flex items-center gap-2 p-2 sm:p-3 bg-[#f8f9fa] border border-[#e3e3e3] rounded-lg"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleSubtaskCompletion(subtask.id)}
+                      className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${
+                        subtask.completed
+                          ? "bg-[#00c851] border-[#00c851]"
+                          : "border-[#d0d0d0] hover:border-[#00c851]"
+                      }`}
+                    >
+                      {subtask.completed && (
+                        <svg
+                          className="w-2.5 h-2.5 text-white"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={3}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                    
+                    <Input
+                      value={subtask.text}
+                      onChange={(e) => updateSubtask(subtask.id, e.target.value)}
+                      placeholder={`Subtask ${index + 1}`}
+                      className={`flex-1 h-8 sm:h-10 text-xs sm:text-sm ${
+                        subtask.completed ? "line-through text-[#828282]" : ""
+                      }`}
+                    />
+                    
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeSubtask(subtask.id)}
+                      className="h-8 sm:h-10 w-8 sm:w-10 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Notes - Hidden on mobile */}
           <div className="space-y-2 hidden sm:block">

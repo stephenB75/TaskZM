@@ -26,6 +26,11 @@ interface Task {
   status: "todo" | "inprogress" | "done";
   scheduledDate: string;
   scheduledTime?: string;
+  subtasks?: Array<{
+    id: string;
+    text: string;
+    completed: boolean;
+  }>;
 }
 
 interface TimelinePanelProps {

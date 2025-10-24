@@ -4,6 +4,16 @@ import {
   CalendarDays,
   Settings,
   Archive,
+  Clock,
+  BarChart3,
+  Users,
+  Download,
+  FileText,
+  Building2,
+  Bell,
+  Filter,
+  Activity,
+  Accessibility,
 } from "lucide-react";
 
 interface VerticalNavBarProps {
@@ -13,6 +23,17 @@ interface VerticalNavBarProps {
     | "settings"
     | "archive"
     | "week"
+    | "timeline"
+    | "analytics"
+    | "time-tracking"
+    | "collaboration"
+    | "export"
+    | "templates"
+    | "workspaces"
+    | "calendar-sync"
+    | "notifications"
+    | "custom-views"
+    | "accessibility"
     | null;
   onPanelChange: (
     panel:
@@ -20,7 +41,17 @@ interface VerticalNavBarProps {
       | "calendar"
       | "settings"
       | "archive"
-      | "week",
+      | "week"
+      | "timeline"
+      | "analytics"
+      | "time-tracking"
+      | "collaboration"
+      | "export"
+      | "templates"
+      | "workspaces"
+      | "calendar-sync"
+      | "notifications"
+      | "custom-views",
   ) => void;
   viewMode: "week" | "month";
   onViewModeChange: (mode: "week" | "month") => void;
@@ -33,39 +64,40 @@ export default function VerticalNavBar({
   onViewModeChange,
 }: VerticalNavBarProps) {
   const navItems = [
-    { id: "inbox" as const, icon: Inbox, label: "Inbox" },
-    {
-      id: "calendar" as const,
-      icon: Calendar,
-      label: "Calendar",
-    },
+    // Core Navigation
     { id: "week" as const, icon: CalendarDays, label: "Week" },
+    { id: "timeline" as const, icon: Clock, label: "Timeline" },
+    { id: "inbox" as const, icon: Inbox, label: "Inbox" },
+    { id: "calendar" as const, icon: Calendar, label: "Calendar" },
     { id: "archive" as const, icon: Archive, label: "Archive" },
-    {
-      id: "settings" as const,
-      icon: Settings,
-      label: "Settings",
-    },
+    
+    // Productivity & Analytics
+    { id: "analytics" as const, icon: BarChart3, label: "Analytics" },
+    { id: "time-tracking" as const, icon: Activity, label: "Time Tracking" },
+    { id: "custom-views" as const, icon: Filter, label: "Custom Views" },
+    
+    // Collaboration & Team
+    { id: "collaboration" as const, icon: Users, label: "Team" },
+    { id: "workspaces" as const, icon: Building2, label: "Workspaces" },
+    
+    // Export & Templates
+    { id: "export" as const, icon: Download, label: "Export" },
+    { id: "templates" as const, icon: FileText, label: "Templates" },
+    
+    // Integration & Notifications
+    { id: "calendar-sync" as const, icon: Calendar, label: "Calendar Sync" },
+    { id: "notifications" as const, icon: Bell, label: "Notifications" },
+    
+    // Settings & Accessibility
+    { id: "settings" as const, icon: Settings, label: "Settings" },
+    { id: "accessibility" as const, icon: Accessibility, label: "Accessibility" },
   ];
 
   return (
     <div className="w-16 h-screen flex-shrink-0 bg-white border-r border-[#e3e3e3] flex flex-col items-center py-6 gap-4">
       {navItems.map((item) => {
         const Icon = item.icon;
-        let isActive = false;
-
-        if (item.id === "inbox") {
-          isActive = activePanel === "inbox";
-        } else if (item.id === "calendar") {
-          isActive = activePanel === "calendar";
-        } else if (item.id === "settings") {
-          isActive = activePanel === "settings";
-        } else if (item.id === "archive") {
-          isActive = activePanel === "archive";
-        } else if (item.id === "week") {
-          isActive =
-            activePanel === null || activePanel === "week";
-        }
+        let isActive = activePanel === item.id;
 
         return (
           <button
@@ -78,12 +110,7 @@ export default function VerticalNavBar({
                 );
                 // Close any open panels to show the main view
                 onPanelChange("week");
-              } else if (
-                item.id === "inbox" ||
-                item.id === "calendar" ||
-                item.id === "settings" ||
-                item.id === "archive"
-              ) {
+              } else {
                 onPanelChange(item.id);
               }
             }}

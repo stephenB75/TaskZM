@@ -36,7 +36,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     // Check if we're in demo mode (no Supabase config)
     const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
-                      import.meta.env.VITE_SUPABASE_URL === 'your_supabase_url_here';
+                      import.meta.env.VITE_SUPABASE_URL === 'your_supabase_url_here' ||
+                      import.meta.env.VITE_SUPABASE_URL === 'https://placeholder.supabase.co';
     
     if (isDemoMode) {
       // Demo mode - create a mock user

@@ -89,6 +89,14 @@ export default function WeekNavigation({
     <div className="bg-white border-b border-[#e3e3e3] px-6 py-4 flex items-center justify-between">
       {/* Week Range */}
       <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <span
+            className="font-['DM_Sans:Medium',_sans-serif] font-medium text-[16px] text-[#313131]"
+            style={{ fontVariationSettings: "'opsz' 14" }}
+          >
+            {formatWeekRange(currentWeek)}
+          </span>
+        </div>
         {!isCurrentWeek() && (
           <button
             onClick={goToToday}

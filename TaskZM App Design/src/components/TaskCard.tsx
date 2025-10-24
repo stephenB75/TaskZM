@@ -1,7 +1,10 @@
 import svgPaths from "../imports/svg-5yy7db8tu3";
 import imgIcon from "figma:asset/963deb7708a8414668396d1993b85035b01204ff.png";
-import { Check } from "lucide-react";
+import { Check, Clock, Play, Pause, Square } from "lucide-react";
 import { useState, useEffect } from "react";
+import { timeTracking } from "../lib/timeTracking";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
 
 interface Tag {
   text: string;
@@ -25,6 +28,13 @@ interface Task {
   files?: { name: string; icon: string }[];
   notes?: string;
   status: "todo" | "inprogress" | "done";
+  scheduledDate: string;
+  scheduledTime?: string;
+  subtasks?: Array<{
+    id: string;
+    text: string;
+    completed: boolean;
+  }>;
   dependencies?: string[];
   recurringGroupId?: string;
 }
@@ -182,6 +192,9 @@ export default function TaskCard({
   const [timeFormat, setTimeFormat] = useState<"12h" | "24h">(
     "12h",
   );
+  const [isTracking, setIsTracking] = useState(false);
+  const [totalTime, setTotalTime] = useState(0);
+  const [currentSessionTime, setCurrentSessionTime] = useState(0);
 
   useEffect(() => {
     // Read time format from localStorage
@@ -192,6 +205,40 @@ export default function TaskCard({
       setTimeFormat(savedTimeFormat);
     }
   }, []);
+
+  // Time tracking effects
+  useEffect(() => {
+    // Subscribe to timer changes
+    const unsubscribe = timeTracking.subscribe((activeTimer) => {
+      setIsTracking(activeTimer?.taskId === task.id);
+    });
+
+    // Load total time for this task
+    const taskTotalTime = timeTracking.getTotalTimeForTask(task.id);
+    setTotalTime(taskTotalTime);
+
+    return unsubscribe;
+  }, [task.id]);
+
+  // Update current session time
+  useEffect(() => {
+    if (!isTracking) {
+      setCurrentSessionTime(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      const activeTimer = timeTracking.getActiveTimer();
+      if (activeTimer && activeTimer.taskId === task.id) {
+        const startTime = new Date(activeTimer.startTime);
+        const now = new Date();
+        const sessionTime = Math.floor((now.getTime() - startTime.getTime()) / (1000 * 60));
+        setCurrentSessionTime(sessionTime);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isTracking, task.id]);
 
   const getStatusColor = (status: Task["status"]) => {
     switch (status) {
@@ -213,6 +260,37 @@ export default function TaskCard({
         task.status === "done" ? "todo" : "done";
       onStatusChange(task.id, newStatus);
     }
+  };
+
+  // Time tracking functions
+  const handleStartTimer = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    timeTracking.startTimer(task.id, `Working on ${task.title}`);
+    setTotalTime(timeTracking.getTotalTimeForTask(task.id));
+  };
+
+  const handleStopTimer = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    timeTracking.stopTimer();
+    setTotalTime(timeTracking.getTotalTimeForTask(task.id));
+  };
+
+  const handlePauseTimer = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    timeTracking.pauseTimer();
+    setTotalTime(timeTracking.getTotalTimeForTask(task.id));
+  };
+
+  const formatDuration = (minutes: number) => {
+    if (minutes < 60) {
+      return `${minutes}m`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    if (remainingMinutes === 0) {
+      return `${hours}h`;
+    }
+    return `${hours}h ${remainingMinutes}m`;
   };
 
   // Check if dependencies are met
@@ -469,6 +547,60 @@ export default function TaskCard({
         </div>
       )}
 
+      {/* Subtasks */}
+      {task.subtasks && task.subtasks.length > 0 && (
+        <div
+          className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full"
+          data-name="Subtasks"
+        >
+          <p
+            className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[11px] relative shrink-0 text-[#828282] text-[9px] w-full"
+            style={{ fontVariationSettings: "'opsz' 14" }}
+          >
+            Subtasks ({task.subtasks.filter(st => st.completed).length}/{task.subtasks.length}):
+          </p>
+          <div className="flex flex-col gap-[2px] w-full">
+            {task.subtasks.slice(0, 3).map((subtask) => (
+              <div
+                key={subtask.id}
+                className="flex items-center gap-2 w-full"
+              >
+                <div
+                  className={`w-3 h-3 rounded border-2 flex items-center justify-center shrink-0 ${
+                    subtask.completed
+                      ? "bg-[#00c851] border-[#00c851]"
+                      : "border-[#d0d0d0]"
+                  }`}
+                >
+                  {subtask.completed && (
+                    <Check
+                      className="w-2 h-2 text-white"
+                      strokeWidth={3}
+                    />
+                  )}
+                </div>
+                <p
+                  className={`font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] relative shrink-0 text-[10px] w-full ${
+                    subtask.completed ? "line-through text-[#828282]" : "text-[#313131]"
+                  }`}
+                  style={{ fontVariationSettings: "'opsz' 14" }}
+                >
+                  {subtask.text}
+                </p>
+              </div>
+            ))}
+            {task.subtasks.length > 3 && (
+              <p
+                className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] relative shrink-0 text-[#828282] text-[9px] w-full"
+                style={{ fontVariationSettings: "'opsz' 14" }}
+              >
+                +{task.subtasks.length - 3} more...
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Separator */}
       <div
         className="h-0 relative shrink-0 w-full"
@@ -512,6 +644,68 @@ export default function TaskCard({
           >
             {formatTime(task.scheduledTime)}
           </p>
+        )}
+      </div>
+
+      {/* Time Tracking */}
+      <div
+        className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full"
+        data-name="TimeTracking"
+      >
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-1">
+            <Clock className="w-3 h-3 text-gray-500" />
+            <span className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[11px] text-[#828282] text-[9px]">
+              Time:
+            </span>
+            <Badge variant="secondary" className="text-xs">
+              {formatDuration(totalTime)}
+            </Badge>
+          </div>
+          
+          <div className="flex items-center gap-1">
+            {!isTracking ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleStartTimer}
+                className="h-6 w-6 p-0 hover:bg-green-100"
+                title="Start timer"
+              >
+                <Play className="w-3 h-3 text-green-600" />
+              </Button>
+            ) : (
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handlePauseTimer}
+                  className="h-6 w-6 p-0 hover:bg-yellow-100"
+                  title="Pause timer"
+                >
+                  <Pause className="w-3 h-3 text-yellow-600" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleStopTimer}
+                  className="h-6 w-6 p-0 hover:bg-red-100"
+                  title="Stop timer"
+                >
+                  <Square className="w-3 h-3 text-red-600" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {isTracking && (
+          <div className="flex items-center gap-1 w-full">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] text-[#00c851] text-[9px]">
+              Live: {formatDuration(currentSessionTime)}
+            </span>
+          </div>
         )}
       </div>
 

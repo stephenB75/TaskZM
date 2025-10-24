@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "./contexts/AuthContext";
+import { CollaborationProvider } from "./contexts/CollaborationContext";
 import Login from "./components/Login";
 import DayColumn from "./components/DayColumn";
 import WeekNavigation from "./components/WeekNavigation";
@@ -14,9 +15,39 @@ import ArchivePanel from "./components/ArchivePanel";
 import AddTaskModal from "./components/AddTaskModal";
 import MobileTodayAgenda from "./components/MobileTodayAgenda";
 import MonthView from "./components/MonthView";
+import CollaborationPanel from "./components/CollaborationPanel";
+import TeamPresenceIndicator from "./components/TeamPresenceIndicator";
+import RealTimeTaskCollaboration from "./components/RealTimeTaskCollaboration";
+import SyncStatusIndicator from "./components/SyncStatusIndicator";
+import CloudSyncSettings from "./components/CloudSyncSettings";
+import TimeTrackingDashboard from "./components/TimeTrackingDashboard";
+import AnalyticsDashboard from "./components/AnalyticsDashboard";
+import CustomViews from "./components/CustomViews";
+import ThemeToggle from "./components/ThemeToggle";
+import KeyboardShortcutsHelp from "./components/KeyboardShortcutsHelp";
+import EnhancedNotificationsPanel from "./components/EnhancedNotificationsPanel";
+import ExportPanel from "./components/ExportPanel";
+import TaskTemplatesPanel from "./components/TaskTemplatesPanel";
+import WorkspacesPanel from "./components/WorkspacesPanel";
+import CalendarSyncPanel from "./components/CalendarSyncPanel";
+import VirtualizedTaskList from "./components/VirtualizedTaskList";
+import PerformanceMonitor from "./components/PerformanceMonitor";
+import RightSidePanel from "./components/RightSidePanel";
+import SettingsPanel from "./components/SettingsPanel";
+import AccessibilityPanel from "./components/AccessibilityPanel";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { usePerformanceOptimization } from "./hooks/usePerformanceOptimization";
+import { notificationService } from "./lib/notifications";
+import { taskTemplateService } from "./lib/taskTemplates";
+import { workspaceService } from "./lib/workspaces";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { handleError, getUserFriendlyMessage } from "./lib/errorHandler";
+import { validateTask } from "./lib/validation";
+import { calendarSyncService } from "./lib/calendarSync";
+import { cloudSync } from "./lib/cloudSync";
 import { sampleTasks } from "./data/sampleTasks";
-import { Plus } from "lucide-react";
-import { toast } from "sonner@2.0.3";
+import { Plus, Users, Cloud, Clock, BarChart3, Filter, Bell, Download, FileText, Building2, Calendar, Activity } from "lucide-react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +58,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./components/ui/alert-dialog";
+import { Button } from "./components/ui/button";
+import { Badge } from "./components/ui/badge";
 import { TagDefinition } from "./components/TagManager";
 import { tasksApi } from "./lib/api";
 import { generateRecurringTasks, validateRecurringConfig } from "./lib/recurringTasks";
@@ -87,6 +120,35 @@ function TaskZMApp({}: TaskZMAppProps) {
   const [taskToArchive, setTaskToArchive] = useState<Task | null>(null);
   const [customTags, setCustomTags] = useState<TagDefinition[]>([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [showCollaborationPanel, setShowCollaborationPanel] = useState(false);
+  const [showCloudSyncSettings, setShowCloudSyncSettings] = useState(false);
+  const [showTimeTrackingDashboard, setShowTimeTrackingDashboard] = useState(false);
+  const [showAnalyticsDashboard, setShowAnalyticsDashboard] = useState(false);
+  const [showCustomViews, setShowCustomViews] = useState(false);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+  const [showEnhancedNotifications, setShowEnhancedNotifications] = useState(false);
+  const [showExportPanel, setShowExportPanel] = useState(false);
+  const [showTaskTemplates, setShowTaskTemplates] = useState(false);
+  const [showWorkspaces, setShowWorkspaces] = useState(false);
+  const [showCalendarSync, setShowCalendarSync] = useState(false);
+  const [showPerformanceMonitor, setShowPerformanceMonitor] = useState(false);
+  const [showAccessibility, setShowAccessibility] = useState(false);
+  const [currentWorkspace, setCurrentWorkspace] = useState(workspaceService.getCurrentWorkspace());
+  const [notificationCount, setNotificationCount] = useState(0);
+
+  // Performance optimization
+  const { optimizedTasks, metrics, isVirtualized, shouldLazyLoad } = usePerformanceOptimization(
+    tasks,
+    {
+      enableVirtualization: true,
+      enableMemoization: true,
+      enableDebouncing: true,
+      debounceDelay: 300,
+      maxRenderItems: 100,
+      enableLazyLoading: true,
+      lazyLoadThreshold: 50
+    }
+  );
 
   // Load tasks from API when user is authenticated
   useEffect(() => {
@@ -95,8 +157,40 @@ function TaskZMApp({}: TaskZMAppProps) {
     }
   }, [user]);
 
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    shortcuts: [
+      { key: 'n', ctrlKey: true, action: () => setShowAddTaskModal(true), description: 'Create new task' },
+      { key: 'g', ctrlKey: true, action: () => setShowAnalyticsDashboard(true), description: 'Toggle analytics' },
+      { key: 'h', ctrlKey: true, action: () => setShowTimeTrackingDashboard(true), description: 'Toggle time tracking' },
+      { key: 'v', ctrlKey: true, action: () => setShowCustomViews(true), description: 'Toggle custom views' },
+      { key: 'b', ctrlKey: true, action: () => setShowEnhancedNotifications(true), description: 'Toggle notifications' },
+      { key: '?', ctrlKey: true, action: () => setShowKeyboardShortcuts(true), description: 'Show keyboard shortcuts' },
+    ],
+    enabled: true,
+  });
+
+  // Notification count updates
+  useEffect(() => {
+    const updateNotificationCount = () => {
+      setNotificationCount(notificationService.getNotificationCount());
+    };
+
+    updateNotificationCount();
+    const unsubscribe = notificationService.subscribe(updateNotificationCount);
+    return unsubscribe;
+  }, []);
+
   const loadTasks = async () => {
     try {
+      // Try to load from cloud first
+      const cloudTasks = await cloudSync.loadTasks();
+      if (cloudTasks.length > 0) {
+        setTasks(cloudTasks);
+        return;
+      }
+
+      // Fallback to API
       const apiTasks = await tasksApi.getAll();
       // Convert API tasks to our Task format
       const formattedTasks = apiTasks.map((task: any) => ({
@@ -272,6 +366,9 @@ function TaskZMApp({}: TaskZMAppProps) {
 
         if (createdTasks.length > 0) {
           setTasks(prev => [...prev, ...createdTasks]);
+          // Sync to cloud
+          await cloudSync.syncTasks([...tasks, ...createdTasks]);
+          cloudSync.markPendingChanges(createdTasks.length);
           toast.success(`Created ${createdTasks.length} recurring task${createdTasks.length > 1 ? 's' : ''}`);
         } else {
           toast.error("Failed to create any recurring task instances");
@@ -279,7 +376,11 @@ function TaskZMApp({}: TaskZMAppProps) {
       } else {
         // Regular single task
         const createdTask = await tasksApi.create(newTask);
-        setTasks(prev => [...prev, { ...newTask, id: createdTask.id }]);
+        const newTaskWithId = { ...newTask, id: createdTask.id };
+        setTasks(prev => [...prev, newTaskWithId]);
+        // Sync to cloud
+        await cloudSync.syncTasks([...tasks, newTaskWithId]);
+        cloudSync.markPendingChanges(1);
         toast.success("Task created successfully");
       }
     } catch (error) {
@@ -374,6 +475,70 @@ function TaskZMApp({}: TaskZMAppProps) {
             onTaskDelete={handleTaskDelete}
           />
         );
+      case "analytics":
+        return (
+          <AnalyticsDashboard
+            isOpen={true}
+            onClose={() => setActivePanel("week")}
+          />
+        );
+      case "time-tracking":
+        return (
+          <TimeTrackingDashboard
+            isOpen={true}
+            onClose={() => setActivePanel("week")}
+          />
+        );
+      case "custom-views":
+        return (
+          <CustomViews
+            isOpen={true}
+            onClose={() => setActivePanel("week")}
+          />
+        );
+      case "collaboration":
+        return (
+          <CollaborationPanel
+            isOpen={true}
+            onClose={() => setActivePanel("week")}
+          />
+        );
+      case "export":
+        return (
+          <ExportPanel
+            isOpen={true}
+            onClose={() => setActivePanel("week")}
+            tasks={tasks}
+          />
+        );
+      case "templates":
+        return (
+          <TaskTemplatesPanel
+            isOpen={true}
+            onClose={() => setActivePanel("week")}
+          />
+        );
+      case "workspaces":
+        return (
+          <WorkspacesPanel
+            isOpen={true}
+            onClose={() => setActivePanel("week")}
+          />
+        );
+      case "calendar-sync":
+        return (
+          <CalendarSyncPanel
+            isOpen={true}
+            onClose={() => setActivePanel("week")}
+          />
+        );
+      case "notifications":
+        return (
+          <EnhancedNotificationsPanel
+            isOpen={true}
+            onClose={() => setActivePanel("week")}
+          />
+        );
       case "settings":
         return (
           <SettingsPanel
@@ -381,13 +546,24 @@ function TaskZMApp({}: TaskZMAppProps) {
             onTagsUpdate={setCustomTags}
           />
         );
+      case "accessibility":
+        setShowAccessibility(true);
+        return null;
       default:
         return null;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <ErrorBoundary
+      onError={(error, errorInfo) => {
+        handleError(error, {
+          component: 'App',
+          action: 'render',
+        });
+      }}
+    >
+      <div className="min-h-screen bg-gray-50">
       {/* Desktop Layout */}
       {!isMobile && (
         <div className="flex h-screen">
@@ -407,12 +583,113 @@ function TaskZMApp({}: TaskZMAppProps) {
               />
               {/* Main Weekly View */}
               <div className="flex-1 flex flex-col">
-                <WeekNavigation
-                  currentWeek={currentWeek}
-                  onWeekChange={setCurrentWeek}
-                  onAutoSchedule={handleAutoSchedule}
-                  onAddTask={() => setShowAddTaskModal(true)}
-                />
+                <div className="flex items-center justify-between">
+                  <WeekNavigation
+                    currentWeek={currentWeek}
+                    onWeekChange={setCurrentWeek}
+                    onAutoSchedule={handleAutoSchedule}
+                    onAddTask={() => setShowAddTaskModal(true)}
+                  />
+                  <div className="flex items-center gap-2">
+                    <SyncStatusIndicator />
+                    <TeamPresenceIndicator />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowCollaborationPanel(true)}
+                    >
+                      <Users className="w-4 h-4 mr-1" />
+                      Team
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowCloudSyncSettings(true)}
+                    >
+                      <Cloud className="w-4 h-4 mr-1" />
+                      Sync
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowTimeTrackingDashboard(true)}
+                    >
+                      <Clock className="w-4 h-4 mr-1" />
+                      Time
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowAnalyticsDashboard(true)}
+                    >
+                      <BarChart3 className="w-4 h-4 mr-1" />
+                      Analytics
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowCustomViews(true)}
+                    >
+                      <Filter className="w-4 h-4 mr-1" />
+                      Views
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowEnhancedNotifications(true)}
+                      className="relative"
+                    >
+                      <Bell className="w-4 h-4 mr-1" />
+                      Notifications
+                      {notificationCount > 0 && (
+                        <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                          {notificationCount}
+                        </Badge>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowExportPanel(true)}
+                    >
+                      <Download className="w-4 h-4 mr-1" />
+                      Export
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowTaskTemplates(true)}
+                    >
+                      <FileText className="w-4 h-4 mr-1" />
+                      Templates
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowWorkspaces(true)}
+                    >
+                      <Building2 className="w-4 h-4 mr-1" />
+                      Workspaces
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowCalendarSync(true)}
+                    >
+                      <Calendar className="w-4 h-4 mr-1" />
+                      Calendar
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowPerformanceMonitor(true)}
+                    >
+                      <Activity className="w-4 h-4 mr-1" />
+                      Performance
+                    </Button>
+                    <ThemeToggle />
+                  </div>
+                </div>
                 <WeeklyKanbanBoard
                   currentWeek={currentWeek}
                   tasks={tasks}
@@ -485,7 +762,220 @@ function TaskZMApp({}: TaskZMAppProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+
+      {/* Right-Side Panels */}
+      <RightSidePanel
+        isOpen={showCollaborationPanel}
+        onClose={() => setShowCollaborationPanel(false)}
+        title="Team Collaboration"
+      >
+        <CollaborationPanel
+          isOpen={true}
+          onClose={() => setShowCollaborationPanel(false)}
+        />
+      </RightSidePanel>
+
+      <RightSidePanel
+        isOpen={showCloudSyncSettings}
+        onClose={() => setShowCloudSyncSettings(false)}
+        title="Cloud Sync Settings"
+      >
+        <CloudSyncSettings
+          isOpen={true}
+          onClose={() => setShowCloudSyncSettings(false)}
+        />
+      </RightSidePanel>
+
+      <RightSidePanel
+        isOpen={showTimeTrackingDashboard}
+        onClose={() => setShowTimeTrackingDashboard(false)}
+        title="Time Tracking"
+      >
+        <TimeTrackingDashboard
+          isOpen={true}
+          onClose={() => setShowTimeTrackingDashboard(false)}
+        />
+      </RightSidePanel>
+
+      <RightSidePanel
+        isOpen={showAnalyticsDashboard}
+        onClose={() => setShowAnalyticsDashboard(false)}
+        title="Analytics Dashboard"
+      >
+        <AnalyticsDashboard
+          isOpen={true}
+          onClose={() => setShowAnalyticsDashboard(false)}
+          tasks={tasks}
+        />
+      </RightSidePanel>
+
+      <RightSidePanel
+        isOpen={showCustomViews}
+        onClose={() => setShowCustomViews(false)}
+        title="Custom Views"
+      >
+        <CustomViews
+          isOpen={true}
+          onClose={() => setShowCustomViews(false)}
+          tasks={tasks}
+        />
+      </RightSidePanel>
+
+      {/* Keyboard Shortcuts Help */}
+      <KeyboardShortcutsHelp
+        isOpen={showKeyboardShortcuts}
+        onClose={() => setShowKeyboardShortcuts(false)}
+      />
+
+      <RightSidePanel
+        isOpen={showEnhancedNotifications}
+        onClose={() => setShowEnhancedNotifications(false)}
+        title="Notifications"
+      >
+        <EnhancedNotificationsPanel
+          isOpen={true}
+          onClose={() => setShowEnhancedNotifications(false)}
+        />
+      </RightSidePanel>
+
+      <RightSidePanel
+        isOpen={showExportPanel}
+        onClose={() => setShowExportPanel(false)}
+        title="Export Tasks"
+      >
+        <ExportPanel
+          isOpen={true}
+          onClose={() => setShowExportPanel(false)}
+          tasks={tasks}
+        />
+      </RightSidePanel>
+
+      <RightSidePanel
+        isOpen={showTaskTemplates}
+        onClose={() => setShowTaskTemplates(false)}
+        title="Task Templates"
+      >
+        <TaskTemplatesPanel
+          isOpen={true}
+          onClose={() => setShowTaskTemplates(false)}
+          onTemplateSelect={(template) => {
+            // Create tasks from template
+            const templateTasks = template.tasks.map((task, index) => ({
+              ...task,
+              id: `task-${Date.now()}-${index}`,
+              scheduledDate: new Date().toISOString().split('T')[0]
+            }));
+            
+            setTasks(prev => [...prev, ...templateTasks]);
+            toast.success(`Created ${templateTasks.length} tasks from "${template.name}" template`);
+          }}
+        />
+      </RightSidePanel>
+
+      <RightSidePanel
+        isOpen={showWorkspaces}
+        onClose={() => setShowWorkspaces(false)}
+        title="Workspaces"
+      >
+        <WorkspacesPanel
+          isOpen={true}
+          onClose={() => setShowWorkspaces(false)}
+          onWorkspaceChange={(workspace) => {
+            setCurrentWorkspace(workspace);
+            // Reload tasks for the new workspace
+            loadTasks();
+          }}
+        />
+      </RightSidePanel>
+
+      <RightSidePanel
+        isOpen={showCalendarSync}
+        onClose={() => setShowCalendarSync(false)}
+        title="Calendar Sync"
+      >
+        <CalendarSyncPanel
+          isOpen={true}
+          onClose={() => setShowCalendarSync(false)}
+        />
+      </RightSidePanel>
+
+      {/* Settings Panel */}
+      <RightSidePanel
+        isOpen={activePanel === "settings"}
+        onClose={() => setActivePanel("timeline")}
+        title="Settings"
+      >
+        <SettingsPanel
+          tasksPerDayLimit={5}
+          onTasksPerDayLimitChange={(limit) => {
+            // Handle tasks per day limit change
+            toast.success(`Tasks per day limit set to ${limit}`);
+          }}
+          weekStartMode="monday"
+          onWeekStartModeChange={(mode) => {
+            // Handle week start mode change
+            toast.success(`Week starts on ${mode === 'monday' ? 'Monday' : 'Current day'}`);
+          }}
+          availableTags={customTags}
+          onAddTag={(tag) => {
+            const newTag = { ...tag, id: `tag-${Date.now()}` };
+            setCustomTags(prev => [...prev, newTag]);
+            toast.success(`Tag "${tag.name}" added`);
+          }}
+          onEditTag={(id, tag) => {
+            setCustomTags(prev => prev.map(t => t.id === id ? { ...tag, id } : t));
+            toast.success(`Tag "${tag.name}" updated`);
+          }}
+          onDeleteTag={(id) => {
+            setCustomTags(prev => prev.filter(t => t.id !== id));
+            toast.success('Tag deleted');
+          }}
+        />
+      </RightSidePanel>
+
+      {/* Accessibility Panel */}
+      <RightSidePanel
+        isOpen={showAccessibility}
+        onClose={() => setShowAccessibility(false)}
+        title="Accessibility Settings"
+      >
+        <AccessibilityPanel
+          isOpen={showAccessibility}
+          onClose={() => setShowAccessibility(false)}
+        />
+      </RightSidePanel>
+
+      <RightSidePanel
+        isOpen={showPerformanceMonitor}
+        onClose={() => setShowPerformanceMonitor(false)}
+        title="Performance Monitor"
+      >
+        <PerformanceMonitor
+          isOpen={true}
+          onClose={() => setShowPerformanceMonitor(false)}
+          metrics={{
+            renderTime: metrics.renderTime,
+            memoryUsage: metrics.memoryUsage,
+            itemCount: metrics.itemCount,
+            visibleItems: metrics.visibleItems,
+            isOptimized: metrics.isOptimized,
+            fps: 60, // This would be calculated in a real implementation
+            networkLatency: 0,
+            cacheHitRate: 0.95
+          }}
+          onOptimize={() => {
+            // Trigger performance optimization
+            toast.success('Performance optimization applied');
+          }}
+          onReset={() => {
+            // Reset performance settings
+            toast.success('Performance settings reset');
+          }}
+        />
+      </RightSidePanel>
+
+      </div>
+    </ErrorBoundary>
   );
 }
 

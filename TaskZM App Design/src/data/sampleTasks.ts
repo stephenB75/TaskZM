@@ -23,6 +23,11 @@ interface Task {
   status: "todo" | "inprogress" | "done";
   scheduledDate: string; // Format: YYYY-MM-DD
   scheduledTime?: string; // Format: HH:MM
+  subtasks?: Array<{
+    id: string;
+    text: string;
+    completed: boolean;
+  }>;
 }
 
 export const sampleTasks: Task[] = [
@@ -78,6 +83,33 @@ export const sampleTasks: Task[] = [
     status: "todo",
     scheduledDate: "2025-10-01",
     scheduledTime: "10:30",
+    subtasks: [
+      {
+        id: "subtask-1",
+        text: "Gather expense reports from all departments",
+        completed: true,
+      },
+      {
+        id: "subtask-2",
+        text: "Analyze spending trends vs. budget allocations",
+        completed: false,
+      },
+      {
+        id: "subtask-3",
+        text: "Identify areas of overspending",
+        completed: false,
+      },
+      {
+        id: "subtask-4",
+        text: "Prepare PowerPoint presentation for stakeholders",
+        completed: false,
+      },
+      {
+        id: "subtask-5",
+        text: "Schedule meeting with finance team",
+        completed: false,
+      },
+    ],
   },
   {
     id: "3",
@@ -122,6 +154,28 @@ export const sampleTasks: Task[] = [
     status: "todo",
     scheduledDate: "2025-10-01",
     scheduledTime: "16:00",
+    subtasks: [
+      {
+        id: "subtask-6",
+        text: "Review recent API changes",
+        completed: false,
+      },
+      {
+        id: "subtask-7",
+        text: "Update API documentation",
+        completed: false,
+      },
+      {
+        id: "subtask-8",
+        text: "Update README with new setup instructions",
+        completed: false,
+      },
+      {
+        id: "subtask-9",
+        text: "Create migration guide for breaking changes",
+        completed: false,
+      },
+    ],
   },
 
   // October 2, 2025 (Thursday)

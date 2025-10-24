@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Plus } from "lucide-react";
 import DayColumn from "./DayColumn";
 import TaskCard from "./TaskCard";
@@ -69,8 +69,8 @@ export default function WeeklyKanbanBoard({
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
 
   // Generate 7 days starting from the current week
-  const getWeekDays = () => {
-    const days = [];
+  const getWeekDays = (): Date[] => {
+    const days: Date[] = [];
     const startDate = new Date(currentWeek);
     startDate.setHours(0, 0, 0, 0);
     
@@ -177,7 +177,7 @@ export default function WeeklyKanbanBoard({
 
         {/* Day columns */}
         <div className="flex-1 flex overflow-x-auto">
-          {weekDays.map((day, dayIndex) => {
+          {weekDays.map((day: Date, dayIndex: number) => {
             const dayTasks = getTasksForDate(day);
             const isToday = day.getTime() === today.getTime();
             
@@ -211,15 +211,9 @@ export default function WeeklyKanbanBoard({
                         <TaskCard
                           key={task.id}
                           task={task}
-                          onStatusChange={(newStatus) => onTaskStatusChange(task.id, newStatus)}
-                          onClick={() => onTaskClick(task)}
-                          onDragStart={() => handleDragStart(task)}
-                          onDragEnd={handleDragEnd}
-                          onReorder={(targetTaskId, position) => 
-                            onReorderTasksInDay(task.id, targetTaskId, position)
-                          }
+                          onStatusChange={(taskId: string, newStatus: "todo" | "inprogress" | "done") => onTaskStatusChange(taskId, newStatus)}
+                          onTaskClick={(taskId) => onTaskClick(task)}
                           allTasks={allTasks}
-                          isDragging={draggedTask?.id === task.id}
                         />
                       ))
                     )}

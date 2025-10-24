@@ -64,7 +64,7 @@ import { tasksApi } from "./lib/api";
 import { generateRecurringTasks, validateRecurringConfig } from "./lib/recurringTasks";
 import { aiAutoSchedule, aiSmartSchedule, validateAIScheduleConfig } from "./lib/aiScheduler";
 
-interface Task {
+export interface Task {
   id: string;
   title: string;
   description: string;

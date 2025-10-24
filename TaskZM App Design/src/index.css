@@ -245,10 +245,34 @@ body {
 
 /* Mobile Optimizations */
 @media (max-width: 768px) {
+  /* iOS and Android specific optimizations */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Allow text selection in content areas */
+  .selectable {
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+  
   /* Touch-friendly sizing */
   button, [role="button"] {
     min-height: 44px;
     min-width: 44px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
   
   /* Improved touch targets */
@@ -479,5 +503,187 @@ body {
   .touch-focus:focus {
     outline: 2px solid #3b82f6;
     outline-offset: 2px;
+  }
+}
+
+/* iOS Specific Optimizations */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific styles */
+  .ios-optimized {
+    -webkit-overflow-scrolling: touch;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  
+  /* iOS safe area support */
+  .ios-safe-area {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* iOS status bar handling */
+  .ios-status-bar {
+    height: env(safe-area-inset-top);
+    background: #ffffff;
+  }
+  
+  /* iOS home indicator area */
+  .ios-home-indicator {
+    height: env(safe-area-inset-bottom);
+    background: #ffffff;
+  }
+  
+  /* iOS specific touch targets */
+  .ios-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  /* iOS specific scrolling */
+  .ios-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+    -webkit-transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Android Specific Optimizations */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  /* Android Chrome specific styles */
+  .android-optimized {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Android status bar handling */
+  .android-status-bar {
+    height: 24px; /* Standard Android status bar height */
+    background: #ffffff;
+  }
+  
+  /* Android navigation bar */
+  .android-nav-bar {
+    height: 48px; /* Standard Android navigation bar height */
+    background: #ffffff;
+  }
+  
+  /* Android specific touch targets */
+  .android-touch-target {
+    min-height: 48px; /* Material Design minimum */
+    min-width: 48px;
+    touch-action: manipulation;
+  }
+  
+  /* Android ripple effect simulation */
+  .android-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .android-ripple:active::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.1);
+    transform: translate(-50%, -50%);
+    animation: ripple 0.6s ease-out;
+  }
+  
+  @keyframes ripple {
+    to {
+      width: 200px;
+      height: 200px;
+      opacity: 0;
+    }
+  }
+}
+
+/* Mobile Viewport Optimizations */
+@viewport {
+  width: device-width;
+  initial-scale: 1;
+  maximum-scale: 1;
+  user-scalable: no;
+}
+
+/* Prevent zoom on input focus (iOS) */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important;
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+}
+
+/* Mobile-specific animations */
+@media (max-width: 768px) {
+  /* Reduced motion for better performance */
+  .mobile-animate {
+    animation-duration: 0.2s;
+    animation-timing-function: ease-out;
+  }
+  
+  /* Mobile-specific transitions */
+  .mobile-transition {
+    transition: all 0.2s ease-out;
+  }
+  
+  /* Mobile-specific transforms */
+  .mobile-transform {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
+
+/* PWA Optimizations */
+@media (display-mode: standalone) {
+  /* PWA specific styles when installed */
+  .pwa-optimized {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Hide browser UI elements */
+  .pwa-fullscreen {
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+}
+
+/* Dark mode support for mobile */
+@media (prefers-color-scheme: dark) and (max-width: 768px) {
+  .mobile-dark {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+  
+  .mobile-dark .mobile-card {
+    background-color: #2a2a2a;
+    border-color: #3a3a3a;
+  }
+  
+  .mobile-dark .mobile-nav {
+    background-color: #2a2a2a;
+    border-color: #3a3a3a;
+  }
+}
+
+/* High DPI displays (Retina, etc.) */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .mobile-hdpi {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }

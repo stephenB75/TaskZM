@@ -43,7 +43,7 @@ export default function MobileBottomNav({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 safe-area-pb">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 safe-area-pb ios-safe-area android-optimized mobile-nav">
       <div className="flex items-center justify-between">
         {/* Navigation Items */}
         <div className="flex items-center space-x-1">
@@ -63,6 +63,8 @@ export default function MobileBottomNav({
                     : 'text-gray-500 hover:text-gray-700'
                   }
                   transition-colors duration-150
+                  touch-feedback ios-touch-target android-touch-target
+                  mobile-transition
                 `}
                 onClick={() => handleNavClick(item.id)}
               >
@@ -81,7 +83,8 @@ export default function MobileBottomNav({
           className="
             ml-2 h-12 w-12 rounded-full bg-blue-600 hover:bg-blue-700
             shadow-lg hover:shadow-xl transition-all duration-200
-            active:scale-95
+            active:scale-95 touch-feedback ios-touch-target android-touch-target
+            mobile-transition android-ripple
           "
           size="sm"
         >

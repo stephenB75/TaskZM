@@ -337,7 +337,7 @@ export default function TaskCard({
 
   return (
     <div
-      className="bg-white box-border content-stretch flex flex-col gap-[6px] items-start p-[8px] relative rounded-[10px] shrink-0 w-[236px] cursor-pointer hover:shadow-lg transition-shadow"
+      className="bg-white box-border content-stretch flex flex-col gap-[6px] items-start p-[8px] relative rounded-[10px] shrink-0 w-[236px] cursor-pointer hover:shadow-lg transition-shadow touch-feedback ios-touch-target android-touch-target mobile-card mobile-transition"
       data-name="Card"
       onClick={() => onTaskClick?.(task.id)}
     >

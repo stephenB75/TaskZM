@@ -1,6 +1,7 @@
 import { useState } from "react";
 import TaskCard from "./TaskCard";
 import { Calendar, Plus, Sparkles } from "lucide-react";
+import { useMobileGestures } from "../hooks/useMobileGestures";
 import {
   Accordion,
   AccordionContent,
@@ -63,6 +64,14 @@ export default function MobileTodayAgenda({
   const [draggedTaskId, setDraggedTaskId] = useState<
     string | null
   >(null);
+  
+  const {
+    onTouchStart,
+    onTouchMove,
+    onTouchEnd,
+    triggerHapticFeedback,
+    isMobile,
+  } = useMobileGestures();
   const [dragOverTaskId, setDragOverTaskId] = useState<
     string | null
   >(null);
@@ -93,7 +102,12 @@ export default function MobileTodayAgenda({
   };
 
   return (
-    <div className="bg-[#f8f9fa] p-4 pb-6">
+    <div 
+      className="bg-[#f8f9fa] p-4 pb-6 ios-optimized android-optimized mobile-padding ios-safe-area"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       {/* Header */}
       <div className="mb-6">
         <div className="mb-2">

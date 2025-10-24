@@ -14,13 +14,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
+const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
+
+export { useAuth };
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -32,6 +34,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check if we're in demo mode (no Supabase config)
+    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
+                      import.meta.env.VITE_SUPABASE_URL === 'your_supabase_url_here';
+    
+    if (isDemoMode) {
+      // Demo mode - create a mock user
+      const mockUser = {
+        id: 'demo-user',
+        email: 'demo@taskzm.app',
+        user_metadata: {
+          full_name: 'Demo User'
+        }
+      } as User;
+      
+      setUser(mockUser);
+      setLoading(false);
+      return;
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -52,6 +73,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    // Check if we're in demo mode
+    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
+                      import.meta.env.VITE_SUPABASE_URL === 'your_supabase_url_here';
+    
+    if (isDemoMode) {
+      // Demo mode - simulate successful login
+      const mockUser = {
+        id: 'demo-user',
+        email: email,
+        user_metadata: {
+          full_name: 'Demo User'
+        }
+      } as User;
+      setUser(mockUser);
+      return;
+    }
+
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -60,6 +98,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    // Check if we're in demo mode
+    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
+                      import.meta.env.VITE_SUPABASE_URL === 'your_supabase_url_here';
+    
+    if (isDemoMode) {
+      // Demo mode - simulate successful signup
+      const mockUser = {
+        id: 'demo-user',
+        email: email,
+        user_metadata: {
+          full_name: fullName
+        }
+      } as User;
+      setUser(mockUser);
+      return;
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -73,11 +128,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const signOut = async () => {
+    // Check if we're in demo mode
+    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
+                      import.meta.env.VITE_SUPABASE_URL === 'your_supabase_url_here';
+    
+    if (isDemoMode) {
+      setUser(null);
+      return;
+    }
+
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
 
   const resetPassword = async (email: string) => {
+    // Check if we're in demo mode
+    const isDemoMode = !import.meta.env.VITE_SUPABASE_URL || 
+                      import.meta.env.VITE_SUPABASE_URL === 'your_supabase_url_here';
+    
+    if (isDemoMode) {
+      // Demo mode - just show success message
+      console.log('Demo mode: Password reset would be sent to', email);
+      return;
+    }
+
     const { error } = await supabase.auth.resetPasswordForEmail(email);
     if (error) throw error;
   };

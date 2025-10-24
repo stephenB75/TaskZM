@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { useAuth } from "./contexts/AuthContext";
 import Login from "./components/Login";
 import DayColumn from "./components/DayColumn";
 import WeekNavigation from "./components/WeekNavigation";
@@ -388,9 +388,5 @@ function TaskZMApp({}: TaskZMAppProps) {
 }
 
 export default function App() {
-  return (
-    <AuthProvider>
-      <TaskZMApp />
-    </AuthProvider>
-  );
+  return <TaskZMApp />;
 }

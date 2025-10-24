@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import { CollaborationProvider } from "./contexts/CollaborationContext";
 import Login from "./components/Login";
@@ -33,7 +33,6 @@ import CalendarSyncPanel from "./components/CalendarSyncPanel";
 import VirtualizedTaskList from "./components/VirtualizedTaskList";
 import PerformanceMonitor from "./components/PerformanceMonitor";
 import RightSidePanel from "./components/RightSidePanel";
-import SettingsPanel from "./components/SettingsPanel";
 import AccessibilityPanel from "./components/AccessibilityPanel";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { usePerformanceOptimization } from "./hooks/usePerformanceOptimization";
@@ -111,7 +110,8 @@ interface TaskZMAppProps {}
 
 function TaskZMApp({}: TaskZMAppProps) {
   const { user, loading } = useAuth();
-  const [activePanel, setActivePanel] = useState<string>("timeline");
+  const [activePanel, setActivePanel] = useState<"timeline" | "week" | "calendar" | "inbox" | "archive" | "analytics" | "time-tracking" | "custom-views" | "collaboration" | "export" | "templates" | "workspaces" | "calendar-sync" | "notifications" | "settings" | "accessibility" | null>("timeline");
+  const [viewMode, setViewMode] = useState<"week" | "month">("week");
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
   const [tasks, setTasks] = useState<Task[]>([]);
   const [inboxTasks, setInboxTasks] = useState<InboxTask[]>([]);
@@ -570,18 +570,20 @@ function TaskZMApp({}: TaskZMAppProps) {
           <VerticalNavBar
             activePanel={activePanel}
             onPanelChange={setActivePanel}
-            onAddTask={() => setShowAddTaskModal(true)}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
           />
-          {activePanel === "timeline" ? (
+          {activePanel === "timeline" || activePanel === "week" ? (
             <div className="flex flex-1">
-              {/* Timeline Sidebar */}
-              <TimelinePanel
-                tasks={getTodayTasks()}
-                onTaskClick={handleTaskClick}
-                onTaskDrop={handleTaskDrop}
-                onReorderTasks={handleReorderTasksInDay}
-              />
-              {/* Main Weekly View */}
+              {activePanel === "timeline" && (
+                <TimelinePanel
+                  tasks={getTodayTasks()}
+                  onTaskClick={handleTaskClick}
+                  onTaskDrop={handleTaskDrop}
+                  onReorderTasks={handleReorderTasksInDay}
+                />
+              )}
+              {/* Main View */}
               <div className="flex-1 flex flex-col">
                 <div className="flex items-center justify-between">
                   <WeekNavigation
@@ -690,19 +692,35 @@ function TaskZMApp({}: TaskZMAppProps) {
                     <ThemeToggle />
                   </div>
                 </div>
-                <WeeklyKanbanBoard
-                  currentWeek={currentWeek}
-                  tasks={tasks}
-                  onTaskStatusChange={handleTaskStatusChange}
-                  onTaskDrop={handleTaskDrop}
-                  onAddTaskToDay={(date) => {
-                    setShowAddTaskModal(true);
-                    // Pre-fill the date in the modal
-                  }}
-                  onTaskClick={handleTaskClick}
-                  onReorderTasksInDay={handleReorderTasksInDay}
-                  allTasks={tasks}
-                />
+                {viewMode === "week" ? (
+                  <WeeklyKanbanBoard
+                    currentWeek={currentWeek}
+                    tasks={tasks}
+                    onTaskStatusChange={handleTaskStatusChange}
+                    onTaskDrop={handleTaskDrop}
+                    onAddTaskToDay={(date) => {
+                      setShowAddTaskModal(true);
+                      // Pre-fill the date in the modal
+                    }}
+                    onTaskClick={handleTaskClick}
+                    onReorderTasksInDay={handleReorderTasksInDay}
+                    allTasks={tasks}
+                  />
+                ) : (
+                  <MonthView
+                    currentWeek={currentWeek}
+                    tasks={tasks}
+                    onTaskStatusChange={handleTaskStatusChange}
+                    onTaskDrop={handleTaskDrop}
+                    onAddTaskToDay={(date) => {
+                      setShowAddTaskModal(true);
+                      // Pre-fill the date in the modal
+                    }}
+                    onTaskClick={handleTaskClick}
+                    onReorderTasksInDay={handleReorderTasksInDay}
+                    allTasks={tasks}
+                  />
+                )}
               </div>
             </div>
           ) : (

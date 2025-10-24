@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskZM App - Static Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #3b82f6;
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+        
+        .preview-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .preview-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .preview-card h3 {
+            color: #1e293b;
+            margin-bottom: 16px;
+            font-size: 1.25rem;
+        }
+        
+        .task-list {
+            list-style: none;
+        }
+        
+        .task-item {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .task-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        
+        .task-meta {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+        
+        .status-todo { background: #fef3c7; color: #92400e; }
+        .status-progress { background: #dbeafe; color: #1e40af; }
+        .status-done { background: #d1fae5; color: #065f46; }
+        
+        .calendar-preview {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            background: #f8fafc;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        .calendar-day.today {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .calendar-day.has-tasks {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: #3b82f6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+        
+        .feature-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .feature-desc {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+        
+        .tech-stack {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+        
+        .tech-stack h4 {
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+        
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .tech-tag {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .mobile-preview {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .preview-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .mobile-preview {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 TaskZM App Preview</h1>
+            <p>A modern task management application with AI-powered scheduling, real-time collaboration, and beautiful design.</p>
+        </div>
+        
+        <div class="preview-grid">
+            <div class="preview-card">
+                <h3>📋 Today's Tasks</h3>
+                <ul class="task-list">
+                    <li class="task-item">
+                        <div class="task-title">Review project proposal</div>
+                        <div class="task-meta">
+                            <span class="status-badge status-progress">In Progress</span>
+                            Due: 2:00 PM
+                        </div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">Team standup meeting</div>
+                        <div class="task-meta">
+                            <span class="status-badge status-todo">To Do</span>
+                            Due: 10:00 AM
+                        </div>
+                    </li>
+                    <li class="task-item">
+                        <div class="task-title">Update documentation</div>
+                        <div class="task-meta">
+                            <span class="status-badge status-done">Done</span>
+                            Completed: 9:30 AM
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="preview-card">
+                <h3>📅 Calendar View</h3>
+                <div class="calendar-preview">
+                    <div class="calendar-day">Mon</div>
+                    <div class="calendar-day">Tue</div>
+                    <div class="calendar-day">Wed</div>
+                    <div class="calendar-day">Thu</div>
+                    <div class="calendar-day">Fri</div>
+                    <div class="calendar-day">Sat</div>
+                    <div class="calendar-day">Sun</div>
+                    <div class="calendar-day">1</div>
+                    <div class="calendar-day">2</div>
+                    <div class="calendar-day">3</div>
+                    <div class="calendar-day">4</div>
+                    <div class="calendar-day">5</div>
+                    <div class="calendar-day">6</div>
+                    <div class="calendar-day">7</div>
+                    <div class="calendar-day">8</div>
+                    <div class="calendar-day">9</div>
+                    <div class="calendar-day">10</div>
+                    <div class="calendar-day">11</div>
+                    <div class="calendar-day">12</div>
+                    <div class="calendar-day">13</div>
+                    <div class="calendar-day">14</div>
+                    <div class="calendar-day">15</div>
+                    <div class="calendar-day">16</div>
+                    <div class="calendar-day">17</div>
+                    <div class="calendar-day">18</div>
+                    <div class="calendar-day">19</div>
+                    <div class="calendar-day">20</div>
+                    <div class="calendar-day">21</div>
+                    <div class="calendar-day">22</div>
+                    <div class="calendar-day">23</div>
+                    <div class="calendar-day">24</div>
+                    <div class="calendar-day">25</div>
+                    <div class="calendar-day">26</div>
+                    <div class="calendar-day">27</div>
+                    <div class="calendar-day">28</div>
+                    <div class="calendar-day">29</div>
+                    <div class="calendar-day">30</div>
+                    <div class="calendar-day">31</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <div class="feature-title">AI Smart Scheduling</div>
+                <div class="feature-desc">Automatically find the best time slots for your tasks based on your schedule and preferences.</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <div class="feature-title">Real-time Sync</div>
+                <div class="feature-desc">Changes sync instantly across all your devices with Supabase real-time subscriptions.</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <div class="feature-title">Mobile Responsive</div>
+                <div class="feature-desc">Beautiful mobile interface with touch-friendly drag-and-drop and bottom navigation.</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🏷️</div>
+                <div class="feature-title">Smart Tagging</div>
+                <div class="feature-desc">Organize tasks with custom tags, colors, and categories for better productivity.</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">Analytics Dashboard</div>
+                <div class="feature-desc">Track your productivity with detailed analytics and completion statistics.</div>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">👥</div>
+                <div class="feature-title">Team Collaboration</div>
+                <div class="feature-desc">Share tasks, assign team members, and collaborate in real-time.</div>
+            </div>
+        </div>
+        
+        <div class="tech-stack">
+            <h4>🛠️ Technology Stack</h4>
+            <div class="tech-tags">
+                <span class="tech-tag">React 18</span>
+                <span class="tech-tag">TypeScript</span>
+                <span class="tech-tag">Tailwind CSS</span>
+                <span class="tech-tag">Vite</span>
+                <span class="tech-tag">Supabase</span>
+                <span class="tech-tag">Railway</span>
+                <span class="tech-tag">PostgreSQL</span>
+                <span class="tech-tag">shadcn/ui</span>
+            </div>
+        </div>
+        
+        <div class="preview-card" style="margin-top: 24px;">
+            <h3>🚀 How to Run the Full App</h3>
+            <p style="margin-bottom: 16px;">To run the complete TaskZM application with all features:</p>
+            <div style="background: #f1f5f9; padding: 16px; border-radius: 8px; font-family: monospace; font-size: 0.875rem;">
+                <div># Install dependencies</div>
+                <div>npm install</div>
+                <br>
+                <div># Start development server</div>
+                <div>npm run dev</div>
+                <br>
+                <div># Open in browser</div>
+                <div>http://localhost:3000</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

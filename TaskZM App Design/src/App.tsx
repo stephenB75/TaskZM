@@ -28,6 +28,7 @@ import {
 } from "./components/ui/alert-dialog";
 import { TagDefinition } from "./components/TagManager";
 import { tasksApi } from "./lib/api";
+import { generateRecurringTasks, validateRecurringConfig } from "./lib/recurringTasks";
 
 interface Task {
   id: string;
@@ -60,10 +61,13 @@ interface Task {
   }>;
   dependencies?: string[];
   recurring?: {
-    type: "daily" | "weekly" | "monthly";
+    frequency: "daily" | "weekly" | "monthly";
     interval: number;
     endDate?: string;
+    count?: number;
+    daysOfWeek?: number[];
   };
+  recurringGroupId?: string;
   archived?: boolean;
   archivedAt?: string;
 }
@@ -154,9 +158,46 @@ function TaskZMApp({}: TaskZMAppProps) {
 
   const handleTaskCreate = async (newTask: Omit<Task, "id">) => {
     try {
-      const createdTask = await tasksApi.create(newTask);
-      setTasks(prev => [...prev, { ...newTask, id: createdTask.id }]);
-      toast.success("Task created successfully");
+      // Check if this is a recurring task
+      if (newTask.recurring) {
+        // Validate recurring configuration
+        const validationErrors = validateRecurringConfig(newTask.recurring);
+        if (validationErrors.length > 0) {
+          toast.error(`Recurring task validation failed: ${validationErrors.join(", ")}`);
+          return;
+        }
+
+        // Generate recurring task instances
+        const recurringTasks = generateRecurringTasks(
+          newTask,
+          newTask.recurring,
+          newTask.scheduledDate
+        );
+
+        // Create all recurring task instances
+        const createdTasks: Task[] = [];
+        for (const taskInstance of recurringTasks) {
+          try {
+            const createdTask = await tasksApi.create(taskInstance);
+            createdTasks.push({ ...taskInstance, id: createdTask.id });
+          } catch (error) {
+            console.error("Failed to create recurring task instance:", error);
+            // Continue with other instances even if one fails
+          }
+        }
+
+        if (createdTasks.length > 0) {
+          setTasks(prev => [...prev, ...createdTasks]);
+          toast.success(`Created ${createdTasks.length} recurring task${createdTasks.length > 1 ? 's' : ''}`);
+        } else {
+          toast.error("Failed to create any recurring task instances");
+        }
+      } else {
+        // Regular single task
+        const createdTask = await tasksApi.create(newTask);
+        setTasks(prev => [...prev, { ...newTask, id: createdTask.id }]);
+        toast.success("Task created successfully");
+      }
     } catch (error) {
       console.error("Failed to create task:", error);
       toast.error("Failed to create task");

@@ -108,7 +108,7 @@ export const useMobileGestures = () => {
 
   // Detect device type
   const isIOS = useCallback(() => {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
   }, []);
 
   const isAndroid = useCallback(() => {

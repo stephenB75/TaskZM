@@ -56,7 +56,7 @@ export default function InboxPanel({
 
   return (
     <div className="w-full md:w-[315px] md:flex-shrink-0">
-      <div className="min-h-[400px] md:h-screen bg-[#e9f7e9] border border-[#e3e3e3] md:border-l md:border-t-0 md:border-r-0 md:border-b-0 rounded-lg md:rounded-none flex flex-col overflow-hidden">
+      <div className="min-h-[400px] md:h-screen bg-white border border-[#e3e3e3] md:border-l md:border-t-0 md:border-r-0 md:border-b-0 rounded-lg md:rounded-none flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-[#e3e3e3]">
           <div className="flex items-center gap-3 mb-2">
@@ -64,15 +64,18 @@ export default function InboxPanel({
               <Inbox className="w-5 h-5 text-[#3300ff]" />
             </div>
             <div>
-              <h2 className="text-[18px] font-bold text-[#313131]">
+              <h2 className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[20px] relative shrink-0 text-[#313131] text-[18px]"
+                  style={{ fontVariationSettings: "'opsz' 14" }}>
                 Inbox
               </h2>
-              <p className="text-[12px] text-[#828282]">
+              <p className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] relative shrink-0 text-[#828282] text-[10px]"
+                 style={{ fontVariationSettings: "'opsz' 14" }}>
                 Quick capture
               </p>
             </div>
           </div>
-          <p className="text-[13px] text-[#828282] mt-2">
+          <p className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] relative shrink-0 text-[#828282] text-[10px] mt-2"
+             style={{ fontVariationSettings: "'opsz' 14" }}>
             {inboxTasks.length} task
             {inboxTasks.length !== 1 ? "s" : ""} waiting to be
             scheduled

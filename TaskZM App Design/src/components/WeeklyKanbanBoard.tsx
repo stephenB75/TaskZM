@@ -131,39 +131,19 @@ export default function WeeklyKanbanBoard({
   };
 
   return (
-    <div className="flex-1 bg-white">
-      {/* Week Header */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
-        <div className="flex">
-          {/* Time column header */}
-          <div className="w-20 flex-shrink-0 border-r border-gray-200 bg-gray-50">
-            <div className="h-16 flex items-center justify-center">
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                Time
-              </span>
-            </div>
+    <div className="flex-1 bg-white flex flex-col">
+      {/* Main scrollable container */}
+      <div className="flex-1 flex overflow-x-auto">
+        {/* Time column - fixed */}
+        <div className="w-20 flex-shrink-0 border-r border-gray-200 bg-gray-50">
+          {/* Time header */}
+          <div className="h-16 flex items-center justify-center border-b border-gray-200 bg-gray-50 sticky top-0 z-20">
+            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Time
+            </span>
           </div>
           
-          {/* Day headers */}
-          <div className="flex-1 flex overflow-x-auto">
-            {weekDays.map((day, index) => (
-              <div
-                key={index}
-                className="w-[280px] flex-shrink-0 border-r border-gray-200"
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, day)}
-              >
-                {formatDayHeader(day)}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Week Content */}
-      <div className="flex h-full">
-        {/* Time column */}
-        <div className="w-20 flex-shrink-0 border-r border-gray-200 bg-gray-50">
+          {/* Time labels */}
           <div className="flex flex-col">
             {Array.from({ length: 24 }, (_, hour) => (
               <div key={hour} className="h-16 border-b border-gray-100 flex items-start justify-center pt-2">
@@ -175,53 +155,59 @@ export default function WeeklyKanbanBoard({
           </div>
         </div>
 
-        {/* Day columns */}
-        <div className="flex-1 flex overflow-x-auto">
-          {weekDays.map((day: Date, dayIndex: number) => {
-            const dayTasks = getTasksForDate(day);
-            const isToday = day.getTime() === today.getTime();
-            
-            return (
-              <div
-                key={dayIndex}
-                className="w-[280px] flex-shrink-0 border-r border-gray-200 bg-white"
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, day)}
-              >
-                <div className="h-full flex flex-col">
-                  {/* Add task button */}
-                  <div className="p-2 border-b border-gray-100">
-                    <button
-                      onClick={() => onAddTaskToDay(day)}
-                      className="w-full flex items-center justify-center gap-2 py-2 px-3 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg border border-dashed border-gray-300 hover:border-blue-300 transition-colors"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Add Task
-                    </button>
-                  </div>
+        {/* Day columns container */}
+        <div className="flex flex-col">
+          {/* Day headers */}
+          <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
+            <div className="flex">
+              {weekDays.map((day, index) => (
+                <div
+                  key={`header-${index}`}
+                  className="w-[280px] flex-shrink-0 border-r border-gray-200"
+                >
+                  {formatDayHeader(day)}
+                </div>
+              ))}
+            </div>
+          </div>
 
-                  {/* Tasks for this day */}
-                  <div className="flex-1 p-3 space-y-2 overflow-y-auto">
-                    {dayTasks.length === 0 ? (
-                      <div className="text-center py-8 text-gray-400 text-sm">
-                        No tasks scheduled
-                      </div>
-                    ) : (
-                      dayTasks.map((task) => (
-                        <TaskCard
-                          key={task.id}
-                          task={task}
-                          onStatusChange={(taskId: string, newStatus: "todo" | "inprogress" | "done") => onTaskStatusChange(taskId, newStatus)}
-                          onTaskClick={(taskId) => onTaskClick(task)}
-                          allTasks={allTasks}
-                        />
-                      ))
-                    )}
+          {/* Day columns with tasks */}
+          <div className="flex">
+            {weekDays.map((day: Date, dayIndex: number) => {
+              const dayTasks = getTasksForDate(day);
+              const isToday = day.getTime() === today.getTime();
+              
+              return (
+                <div
+                  key={dayIndex}
+                  className="w-[280px] flex-shrink-0 border-r border-gray-200 bg-white"
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, day)}
+                >
+                  <div className="h-full flex flex-col">
+                    {/* Tasks for this day */}
+                    <div className="flex-1 p-3 space-y-2 overflow-y-auto">
+                      {dayTasks.length === 0 ? (
+                        <div className="text-center py-8 text-gray-400 text-sm">
+                          No tasks scheduled
+                        </div>
+                      ) : (
+                        dayTasks.map((task) => (
+                          <TaskCard
+                            key={task.id}
+                            task={task}
+                            onStatusChange={(taskId: string, newStatus: "todo" | "inprogress" | "done") => onTaskStatusChange(taskId, newStatus)}
+                            onTaskClick={(taskId) => onTaskClick(task)}
+                            allTasks={allTasks}
+                          />
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

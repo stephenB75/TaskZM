@@ -2,9 +2,460 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CSS Variables for UI Components */
+:root {
+  --primary: #3300ff;
+  --primary-foreground: #ffffff;
+  --card: #ffffff;
+  --card-foreground: #313131;
+  --switch-background: #e5e7eb;
+  --ring: #3300ff;
+  --input: #f3f4f6;
+  --background: #f8f9fa;
+  --foreground: #313131;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --border: #e5e7eb;
+  --accent: #f3f4f6;
+  --accent-foreground: #313131;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --popover: #ffffff;
+  --popover-foreground: #313131;
+}
+
+/* Dark mode variables */
+.dark {
+  --primary: #3300ff;
+  --primary-foreground: #ffffff;
+  --card: #1f2937;
+  --card-foreground: #f9fafb;
+  --switch-background: #374151;
+  --ring: #3300ff;
+  --input: #374151;
+  --background: #111827;
+  --foreground: #f9fafb;
+  --muted: #374151;
+  --muted-foreground: #9ca3af;
+  --border: #374151;
+  --accent: #374151;
+  --accent-foreground: #f9fafb;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --popover: #1f2937;
+  --popover-foreground: #f9fafb;
+}
+
 /* Custom styles for TaskZM App */
 body {
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #f8f9fa; /* Design Standards Background */
+}
+
+/* App Color Scheme - Design Standards Compliant */
+.app-background {
+  background-color: #f8f9fa; /* Design Standards Background */
+}
+
+.panel-background {
+  background-color: #ffffff; /* Design Standards White */
+  border-color: rgba(0, 0, 0, 0.1); /* Design Standards Border Light */
+}
+
+.active-state {
+  color: #3300ff; /* Design Standards Primary Blue */
+  background-color: rgba(51, 0, 255, 0.05);
+}
+
+.header-background {
+  background: #ffffff; /* Clean white header */
+}
+
+.focus-primary {
+  @apply focus:ring-2 focus:ring-[#3300ff]/20 focus:border-[#3300ff];
+}
+
+.hover-primary {
+  @apply hover:bg-[#e9ebef] hover:text-[#313131]; /* Design Standards Accent Gray */
+}
+
+.accent-primary {
+  color: #3300ff; /* Design Standards Primary Blue */
+}
+
+.bg-primary-subtle {
+  background-color: #e9ebef; /* Design Standards Accent Gray */
+}
+
+/* Design Standards Typography */
+.text-primary {
+  color: #313131; /* Design Standards Text Primary */
+}
+
+.text-secondary {
+  color: #828282; /* Design Standards Text Secondary */
+}
+
+.text-large-heading {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.text-medium-heading {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.text-base-text {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.text-small-text {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.text-extra-small {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.text-tiny-text {
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* ADHD Accessibility Features */
+
+/* Focus Mode - Dims non-active areas */
+.focus-mode {
+  position: relative;
+}
+
+.focus-mode .focus-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.focus-mode .focus-highlight {
+  position: relative;
+  z-index: 20;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(51, 0, 255, 0.3);
+}
+
+.focus-mode .task-card.completed {
+  opacity: 0.4;
+}
+
+.focus-mode .today-agenda-panel {
+  opacity: 0.3;
+}
+
+/* Visual Calm Mode - Reduces motion and visual noise */
+.calm-mode {
+  --animation-duration: 0ms !important;
+}
+
+.calm-mode * {
+  transition-duration: 0ms !important;
+  animation-duration: 0ms !important;
+  animation-iteration-count: 1 !important;
+}
+
+.calm-mode .task-card:hover {
+  transform: none !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.calm-mode .task-card {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.calm-mode .btn:hover {
+  transform: none !important;
+}
+
+.calm-mode .nav-item:hover {
+  transform: none !important;
+}
+
+/* ADHD Spacing - Increased element spacing */
+.adhd-spacing .task-card {
+  margin-bottom: 16px !important;
+}
+
+.adhd-spacing .day-column {
+  padding: 16px !important;
+}
+
+.adhd-spacing .nav-item {
+  margin-bottom: 12px !important;
+}
+
+.adhd-spacing .form-field {
+  margin-bottom: 20px !important;
+}
+
+/* Priority Indicators - Left border colors */
+.priority-indicator-high {
+  border-left: 4px solid #dc2626 !important;
+}
+
+.priority-indicator-medium {
+  border-left: 4px solid #d97706 !important;
+}
+
+.priority-indicator-low {
+  border-left: 4px solid #6b7280 !important;
+}
+
+/* Time Awareness */
+.time-awareness-bar {
+  background: linear-gradient(135deg, #3300ff 0%, #5533ff 50%, #7c3aed 100%);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(51, 0, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.day-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.day-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffffff 0%, #f0f9ff 100%);
+  border-radius: 3px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.3);
+}
+
+.day-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+  animation: shimmer 2s infinite;
+}
+
+/* Clean Minimalist Analytics Progress Bar */
+.analytics-progress-bar {
+  background: linear-gradient(135deg, #3300ff 0%, #1a00cc 100%);
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(51, 0, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0 16px 16px 16px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+.analytics-progress-bar .flex {
+  width: 100%;
+}
+
+.analytics-progress-bar .text-white {
+  color: white;
+}
+
+.analytics-progress-bar .text-white\/80 {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .analytics-progress-bar {
+    margin: 0 8px 12px 8px;
+    padding: 10px 16px;
+    min-height: 44px;
+  }
+  
+  .analytics-progress-bar .flex.items-center.gap-6 {
+    gap: 12px;
+  }
+  
+  .analytics-progress-bar .text-sm {
+    font-size: 12px;
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Celebration Animations */
+.celebration-confetti {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.celebration-checkmark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  color: #22c55e;
+  z-index: 1000;
+  animation: celebrationPulse 1s ease-out;
+}
+
+@keyframes celebrationPulse {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+
+/* Pomodoro Timer */
+.pomodoro-timer {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: white;
+  border: 2px solid #3300ff;
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 50;
+  min-width: 200px;
+}
+
+.pomodoro-timer.work {
+  border-color: #22c55e;
+  background: #f0fdf4;
+}
+
+.pomodoro-timer.break {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.pomodoro-timer.long-break {
+  border-color: #8b5cf6;
+  background: #faf5ff;
+}
+
+/* Do Not Disturb Mode */
+.do-not-disturb {
+  position: relative;
+}
+
+.do-not-disturb::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.1);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.do-not-disturb .notification-toast {
+  display: none !important;
+}
+
+/* Task Breakdown Assistant */
+.task-breakdown-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(51, 0, 255, 0.1);
+  border: 1px solid #3300ff;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 10px;
+  color: #3300ff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.task-card:hover .task-breakdown-button {
+  opacity: 1;
+}
+
+.subtask-progress {
+  width: 100%;
+  height: 2px;
+  background: #e5e7eb;
+  border-radius: 1px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.subtask-progress-fill {
+  height: 100%;
+  background: #22c55e;
+  border-radius: 1px;
+  transition: width 0.3s ease;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .calm-mode,
+  .calm-mode * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+  .task-card {
+    border: 2px solid #000 !important;
+  }
+  
+  .priority-indicator-high {
+    border-left: 6px solid #dc2626 !important;
+  }
+  
+  .priority-indicator-medium {
+    border-left: 6px solid #d97706 !important;
+  }
+  
+  .priority-indicator-low {
+    border-left: 6px solid #6b7280 !important;
+  }
 }
 
 /* Typography Enhancements */
@@ -307,6 +758,62 @@ h1, h2, h3, h4, h5, h6 {
 .high-contrast .keyboard-nav [role="button"]:focus {
   outline: 3px solid #000000;
   outline-offset: 2px;
+}
+
+/* Responsive Layout Optimizations */
+@media (max-width: 1536px) {
+  /* 2XL screens and below */
+  .desktop-layout {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+}
+
+/* Ensure proper scrolling on smaller screens */
+@media (max-width: 1400px) {
+  .desktop-layout {
+    overflow-x: auto;
+  }
+  
+  .main-content-area {
+    min-width: 600px; /* Ensure minimum width for week view */
+  }
+}
+
+@media (max-width: 1280px) {
+  /* XL screens and below */
+  .desktop-layout {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  /* LG screens and below - tablet landscape */
+  .desktop-layout {
+    flex-direction: column;
+  }
+  
+  .today-agenda-panel {
+    width: 100%;
+    height: 40vh;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .main-content-area {
+    height: 60vh;
+  }
+}
+
+@media (max-width: 768px) {
+  /* MD screens and below - tablet portrait and mobile */
+  .desktop-layout {
+    display: none; /* Hide desktop layout on mobile */
+  }
+  
+  .mobile-layout {
+    display: flex;
+  }
 }
 
 /* Mobile Optimizations */

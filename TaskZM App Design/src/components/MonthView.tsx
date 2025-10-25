@@ -211,10 +211,10 @@ export default function MonthView({
                 <div
                   className={`flex items-center justify-center w-8 h-8 rounded-full ${
                     isTodayDate
-                      ? "bg-[#3300ff] text-white font-bold"
+                      ? "bg-[#10b981] text-white font-bold"
                       : isCurrentMonthDate
-                        ? "text-[#313131]"
-                        : "text-[#9CA3AF]"
+                        ? "text-[#1f2937] bg-gray-50"
+                        : "text-[#9CA3AF] bg-gray-100"
                   }`}
                 >
                   <span className="text-[14px]">
@@ -222,9 +222,9 @@ export default function MonthView({
                   </span>
                 </div>
                 {isCurrentMonthDate && dayTasks.length > 0 && (
-                  <span className="text-[11px] text-[#828282] font-medium">
+                  <div className="inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 py-0.5 rounded-full text-[10px] font-bold shadow-sm bg-[#3300ff] text-white">
                     {dayTasks.length}
-                  </span>
+                  </div>
                 )}
               </div>
 

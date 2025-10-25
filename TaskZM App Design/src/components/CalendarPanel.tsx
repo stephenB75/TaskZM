@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import TaskCard from "./TaskCard";
 
@@ -107,7 +107,7 @@ export default function CalendarPanel({
   );
 
   const renderCalendarDays = () => {
-    const days = [];
+    const days: React.ReactElement[] = [];
 
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
@@ -142,17 +142,23 @@ export default function CalendarPanel({
             min-h-[44px] md:min-h-0
           `}
         >
-          <div className="flex flex-col h-full justify-center">
+          <div className="flex flex-col h-full justify-center relative">
             <span
               className={`text-[14px] md:text-[13px] ${isSelected ? "font-bold" : "font-medium"}`}
             >
               {day}
             </span>
             {dayTasks.length > 0 && (
-              <div className="flex-1 flex items-end justify-center pb-0.5 mt-0.5">
+              <div className="flex-1 flex items-end justify-center pb-1 mt-1">
                 <div
-                  className={`w-1.5 h-1.5 md:w-1.5 md:h-1.5 rounded-full ${isSelected ? "bg-white" : "bg-[#3300ff]"}`}
-                />
+                  className={`inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 py-0.5 rounded-full text-[10px] font-bold shadow-sm ${
+                    isSelected 
+                      ? "bg-white text-[#3300ff] border border-[#3300ff]" 
+                      : "bg-[#3300ff] text-white"
+                  }`}
+                >
+                  {dayTasks.length}
+                </div>
               </div>
             )}
           </div>
@@ -164,10 +170,11 @@ export default function CalendarPanel({
   };
 
   return (
-    <div className="w-full md:w-[315px] h-full md:h-screen bg-[#e9f7e9] md:border-l border-[#e5e7eb] flex flex-col overflow-hidden">
+    <div className="w-full md:w-[315px] h-full md:h-screen bg-white md:border-l border-[#e5e7eb] flex flex-col overflow-hidden">
       {/* Header */}
       <div className="flex-shrink-0 px-6 pt-0 pb-4 md:p-6 border-b border-[#e5e7eb]">
-        <h2 className="text-[24px] font-bold text-[#313131]">
+        <h2 className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[24px] relative shrink-0 text-[#313131] text-[24px]"
+            style={{ fontVariationSettings: "'opsz' 14" }}>
           Calendar
         </h2>
       </div>
@@ -176,7 +183,8 @@ export default function CalendarPanel({
       <div className="flex-shrink-0 px-6 py-4 md:p-6 border-b border-[#e5e7eb]">
         {/* Month Navigation */}
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[18px] md:text-[16px] font-bold text-[#313131]">
+          <h3 className="font-['DM_Sans:Bold',_sans-serif] font-bold leading-[21px] relative shrink-0 text-[#313131] text-[21px] md:text-[18px]"
+              style={{ fontVariationSettings: "'opsz' 14" }}>
             {monthYearString}
           </h3>
           <div className="flex gap-2">

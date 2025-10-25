@@ -95,7 +95,7 @@ export default function DayColumn({
 
   return (
     <div
-      className={`bg-[#fdfdfd] w-[320px] flex-shrink-0 h-full border-r border-[#e3e3e3] flex flex-col ${isToday ? "bg-blue-50" : ""}`}
+      className={`bg-[#fdfdfd] w-[280px] flex-shrink-0 h-full border-r border-[#e3e3e3] flex flex-col ${isToday ? "bg-blue-50" : ""}`}
       data-name="DayColumn"
       onDragOver={handleDragOver}
       onDrop={handleDrop}

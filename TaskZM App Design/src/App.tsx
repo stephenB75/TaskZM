@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "./contexts/AuthContext";
 import { CollaborationProvider } from "./contexts/CollaborationContext";
+import { useADHDSettings } from "./hooks/useADHDSettings";
+import TimeAwarenessBar from "./components/TimeAwarenessBar";
+import PomodoroTimer from "./components/PomodoroTimer";
+import CelebrationAnimation from "./components/CelebrationAnimation";
+import FocusModeOverlay from "./components/FocusModeOverlay";
 import Login from "./components/Login";
 import DayColumn from "./components/DayColumn";
 import WeekNavigation from "./components/WeekNavigation";
 import TimelinePanel from "./components/TimelinePanel";
+import TodayAgendaView from "./components/TodayAgendaView";
 import WeeklyKanbanBoard from "./components/WeeklyKanbanBoard";
+import RightSidePanel from "./components/RightSidePanel";
 import VerticalNavBar from "./components/VerticalNavBar";
 import MobileBottomNav from "./components/MobileBottomNav";
 import InboxPanel, { InboxTask } from "./components/InboxPanel";
@@ -32,7 +39,6 @@ import WorkspacesPanel from "./components/WorkspacesPanel";
 import CalendarSyncPanel from "./components/CalendarSyncPanel";
 import VirtualizedTaskList from "./components/VirtualizedTaskList";
 import PerformanceMonitor from "./components/PerformanceMonitor";
-import RightSidePanel from "./components/RightSidePanel";
 import AccessibilityPanel from "./components/AccessibilityPanel";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { usePerformanceOptimization } from "./hooks/usePerformanceOptimization";
@@ -110,10 +116,20 @@ interface TaskZMAppProps {}
 
 function TaskZMApp({}: TaskZMAppProps) {
   const { user, loading } = useAuth();
-  const [activePanel, setActivePanel] = useState<"timeline" | "week" | "calendar" | "inbox" | "archive" | "analytics" | "time-tracking" | "custom-views" | "collaboration" | "export" | "templates" | "workspaces" | "calendar-sync" | "notifications" | "settings" | "accessibility" | null>("timeline");
+  const { settings: adhdSettings } = useADHDSettings();
+  const [activePanel, setActivePanel] = useState<"inbox" | "calendar" | "menu" | "settings" | null>(null);
+  const [showFeaturesMenu, setShowFeaturesMenu] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"week" | "month">("week");
   const [currentWeek, setCurrentWeek] = useState<Date>(new Date());
   const [tasks, setTasks] = useState<Task[]>([]);
+  
+  // ADHD-specific state
+  const [showTimeAwareness, setShowTimeAwareness] = useState(adhdSettings.timeAwareness);
+  const [showPomodoro, setShowPomodoro] = useState(adhdSettings.pomodoroEnabled);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationType, setCelebrationType] = useState<'confetti' | 'checkmark' | 'sparkles'>('checkmark');
+  const [focusArea, setFocusArea] = useState<'week' | 'agenda' | 'task' | null>(null);
   const [inboxTasks, setInboxTasks] = useState<InboxTask[]>([]);
   const [showAddTaskModal, setShowAddTaskModal] = useState(false);
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
@@ -257,6 +273,12 @@ function TaskZMApp({}: TaskZMAppProps) {
     if (task) {
       const updatedTask = { ...task, status: newStatus };
       await handleTaskUpdate(updatedTask);
+      
+      // Trigger celebration if task completed and celebrations enabled
+      if (newStatus === 'done' && adhdSettings.celebrateCompletions) {
+        setCelebrationType('checkmark');
+        setShowCelebration(true);
+      }
     }
   };
 
@@ -409,7 +431,7 @@ function TaskZMApp({}: TaskZMAppProps) {
     if (taskToArchive) {
       const archivedTask = {
         ...taskToArchive,
-        status: "archived" as const,
+        status: "done" as const,
         archived: true,
         archivedAt: new Date().toISOString(),
       };
@@ -434,124 +456,13 @@ function TaskZMApp({}: TaskZMAppProps) {
   const getInboxTasks = () => {
     return tasks.filter(task => 
       !task.scheduledDate && !task.archived
-    ).map(task => ({
-      id: task.id,
-      title: task.title,
-      description: task.description,
-      priority: task.priority,
-      tags: task.tags,
-      createdAt: new Date().toISOString(),
-    }));
+    );
   };
 
   const renderMainContent = () => {
-    switch (activePanel) {
-      case "calendar":
-        return (
-          <CalendarPanel
-            tasks={tasks}
-            onTaskUpdate={handleTaskUpdate}
-            onTaskArchive={handleArchiveTask}
-            onTaskDelete={handleTaskDelete}
-          />
-        );
-      case "inbox":
-        return (
-          <InboxPanel
-            tasks={getInboxTasks()}
-            onTaskUpdate={handleTaskUpdate}
-            onTaskArchive={handleArchiveTask}
-            onTaskDelete={handleTaskDelete}
-          />
-        );
-      case "archive":
-        return (
-          <ArchivePanel
-            tasks={tasks.filter(task => task.archived)}
-            onTaskRestore={(task) => {
-              const restoredTask = { ...task, archived: false, status: "todo" as const };
-              handleTaskUpdate(restoredTask);
-            }}
-            onTaskDelete={handleTaskDelete}
-          />
-        );
-      case "analytics":
-        return (
-          <AnalyticsDashboard
-            isOpen={true}
-            onClose={() => setActivePanel("week")}
-          />
-        );
-      case "time-tracking":
-        return (
-          <TimeTrackingDashboard
-            isOpen={true}
-            onClose={() => setActivePanel("week")}
-          />
-        );
-      case "custom-views":
-        return (
-          <CustomViews
-            isOpen={true}
-            onClose={() => setActivePanel("week")}
-          />
-        );
-      case "collaboration":
-        return (
-          <CollaborationPanel
-            isOpen={true}
-            onClose={() => setActivePanel("week")}
-          />
-        );
-      case "export":
-        return (
-          <ExportPanel
-            isOpen={true}
-            onClose={() => setActivePanel("week")}
-            tasks={tasks}
-          />
-        );
-      case "templates":
-        return (
-          <TaskTemplatesPanel
-            isOpen={true}
-            onClose={() => setActivePanel("week")}
-          />
-        );
-      case "workspaces":
-        return (
-          <WorkspacesPanel
-            isOpen={true}
-            onClose={() => setActivePanel("week")}
-          />
-        );
-      case "calendar-sync":
-        return (
-          <CalendarSyncPanel
-            isOpen={true}
-            onClose={() => setActivePanel("week")}
-          />
-        );
-      case "notifications":
-        return (
-          <EnhancedNotificationsPanel
-            isOpen={true}
-            onClose={() => setActivePanel("week")}
-          />
-        );
-      case "settings":
-        return (
-          <SettingsPanel
-            customTags={customTags}
-            onTagsUpdate={setCustomTags}
-          />
-        );
-      case "accessibility":
-        setShowAccessibility(true);
-        return null;
-      default:
-        return null;
-    }
+    // This function is now only used for features accessed through the menu panel
+    // The main navigation (week, timeline, inbox, calendar, menu) is handled in the main layout
+    return null;
   };
 
   return (
@@ -563,42 +474,71 @@ function TaskZMApp({}: TaskZMAppProps) {
         });
       }}
     >
-      <div className="min-h-screen bg-gray-50">
+      <div className={`min-h-screen ${adhdSettings.focusMode ? 'focus-mode' : ''} ${adhdSettings.visualCalmMode ? 'calm-mode' : ''} ${adhdSettings.doNotDisturb ? 'do-not-disturb' : ''}`} style={{ backgroundColor: '#f8f9fa' }}>
+      {/* ADHD Components */}
+      <TimeAwarenessBar 
+        isVisible={true} 
+        onToggle={() => {}}
+        tasks={tasks}
+      />
+      <PomodoroTimer 
+        workDuration={adhdSettings.pomodoroWorkDuration}
+        breakDuration={adhdSettings.pomodoroBreakDuration}
+        isVisible={showPomodoro} 
+        onToggle={() => setShowPomodoro(!showPomodoro)} 
+      />
+      <CelebrationAnimation 
+        isVisible={showCelebration}
+        type={celebrationType}
+        onComplete={() => setShowCelebration(false)}
+      />
+      <FocusModeOverlay 
+        isActive={adhdSettings.focusMode}
+        focusArea={focusArea}
+        onClose={() => setFocusArea(null)}
+      />
+      
       {/* Desktop Layout */}
       {!isMobile && (
-        <div className="flex h-screen">
+        <div className="desktop-layout flex h-screen w-full">
           <VerticalNavBar
             activePanel={activePanel}
             onPanelChange={setActivePanel}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
           />
-          {activePanel === "timeline" || activePanel === "week" ? (
-            <div className="flex flex-1">
-              {activePanel === "timeline" && (
-                <TimelinePanel
-                  tasks={getTodayTasks()}
-                  onTaskClick={handleTaskClick}
-                  onTaskDrop={handleTaskDrop}
-                  onReorderTasks={handleReorderTasksInDay}
-                />
-              )}
-              {/* Main View */}
-              <div className="flex-1 flex flex-col">
-                <div className="flex items-center justify-between">
-                  <WeekNavigation
-                    currentWeek={currentWeek}
-                    onWeekChange={setCurrentWeek}
-                    onAutoSchedule={handleAutoSchedule}
-                    onAddTask={() => setShowAddTaskModal(true)}
-                  />
-                  <div className="flex items-center gap-2">
-                    <SyncStatusIndicator />
-                    <TeamPresenceIndicator />
-                    <ThemeToggle />
-                  </div>
-                </div>
-                {viewMode === "week" ? (
+          
+          {/* Today's Agenda - Static Panel (Right of Vertical Nav) */}
+          <div className="today-agenda-panel w-[315px] lg:w-[315px] md:w-[280px] sm:w-[260px] flex-shrink-0 bg-white border-r border-gray-200 h-full">
+            <TodayAgendaView
+              tasks={tasks}
+              onTaskClick={handleTaskClick}
+              onTaskUpdate={handleTaskUpdate}
+              onAddTask={() => setShowAddTaskModal(true)}
+            />
+          </div>
+
+          {/* Main Content Area */}
+          <div className="main-content-area flex-1 flex flex-col min-w-0">
+            {/* Week Navigation */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 header-background">
+                    <WeekNavigation
+                      currentWeek={currentWeek}
+                      onWeekChange={setCurrentWeek}
+                      onAutoSchedule={handleAutoSchedule}
+                      onAddTask={() => setShowAddTaskModal(true)}
+                      viewMode={viewMode}
+                      onViewModeChange={setViewMode}
+                      onOpenSettings={() => setShowAccessibility(true)}
+                    />
+              <div className="flex items-center gap-2">
+                <TeamPresenceIndicator />
+              </div>
+            </div>
+
+            {/* Main View Content */}
+            <div className="flex-1 overflow-hidden">
+              {/* Show week view only when no panel is active */}
+              {!activePanel && (
+                viewMode === "week" ? (
                   <WeeklyKanbanBoard
                     currentWeek={currentWeek}
                     tasks={tasks}
@@ -606,7 +546,6 @@ function TaskZMApp({}: TaskZMAppProps) {
                     onTaskDrop={handleTaskDrop}
                     onAddTaskToDay={(date) => {
                       setShowAddTaskModal(true);
-                      // Pre-fill the date in the modal
                     }}
                     onTaskClick={handleTaskClick}
                     onReorderTasksInDay={handleReorderTasksInDay}
@@ -614,46 +553,242 @@ function TaskZMApp({}: TaskZMAppProps) {
                   />
                 ) : (
                   <MonthView
-                    currentWeek={currentWeek}
+                    currentDate={currentWeek}
                     tasks={tasks}
-                    onTaskStatusChange={handleTaskStatusChange}
+                    onTaskClick={(taskId) => {
+                      const task = tasks.find(t => t.id === taskId);
+                      if (task) handleTaskClick(task);
+                    }}
                     onTaskDrop={handleTaskDrop}
                     onAddTaskToDay={(date) => {
                       setShowAddTaskModal(true);
-                      // Pre-fill the date in the modal
                     }}
-                    onTaskClick={handleTaskClick}
-                    onReorderTasksInDay={handleReorderTasksInDay}
-                    allTasks={tasks}
                   />
-                )}
-              </div>
+                )
+              )}
             </div>
-          ) : (
-            renderMainContent()
+          </div>
+
+          {/* Right Side Panels */}
+          {activePanel === "inbox" && (
+            <RightSidePanel
+              isOpen={true}
+              onClose={() => setActivePanel(null)}
+              title="Inbox"
+            >
+              <InboxPanel
+                inboxTasks={inboxTasks}
+                onAddInboxTask={(task) => {
+                  setInboxTasks(prev => [...prev, task]);
+                }}
+                onScheduleTask={(taskId, title) => {
+                  // Handle schedule task
+                  setShowAddTaskModal(true);
+                }}
+              />
+            </RightSidePanel>
           )}
+
+          {activePanel === "calendar" && (
+            <RightSidePanel
+              isOpen={true}
+              onClose={() => setActivePanel(null)}
+              title="Calendar"
+            >
+              <CalendarPanel
+                tasks={tasks}
+                onTaskStatusChange={handleTaskStatusChange}
+                onTaskClick={(taskId) => {
+                  const task = tasks.find(t => t.id === taskId);
+                  if (task) handleTaskClick(task);
+                }}
+              />
+            </RightSidePanel>
+          )}
+
+          {activePanel === "settings" && (
+            <RightSidePanel
+              isOpen={true}
+              onClose={() => setActivePanel(null)}
+              title="Settings"
+            >
+              <SettingsPanel
+                tasksPerDayLimit={5}
+                onTasksPerDayLimitChange={(limit) => {
+                  console.log(`Tasks per day limit set to ${limit}`);
+                }}
+                weekStartMode="monday"
+                onWeekStartModeChange={(mode) => {
+                  console.log(`Week starts on ${mode === 'monday' ? 'Monday' : 'Current day'}`);
+                }}
+                availableTags={customTags}
+                onAddTag={(tag) => {
+                  const newTag = { ...tag, id: `tag-${Date.now()}` };
+                  setCustomTags(prev => [...prev, newTag]);
+                  console.log(`Tag "${tag.text}" added`);
+                }}
+                onEditTag={(id, tag) => {
+                  setCustomTags(prev => prev.map(t => t.id === id ? { ...tag, id } : t));
+                  console.log(`Tag "${tag.text}" updated`);
+                }}
+                onDeleteTag={(id) => {
+                  setCustomTags(prev => prev.filter(t => t.id !== id));
+                  console.log('Tag deleted');
+                }}
+              />
+            </RightSidePanel>
+          )}
+
+          {activePanel === "menu" && (
+            <RightSidePanel
+              isOpen={true}
+              onClose={() => setActivePanel(null)}
+              title="Settings"
+            >
+              <SettingsPanel
+                tasksPerDayLimit={5}
+                onTasksPerDayLimitChange={(limit) => {
+                  console.log(`Tasks per day limit set to ${limit}`);
+                }}
+                weekStartMode="monday"
+                onWeekStartModeChange={(mode) => {
+                  console.log(`Week starts on ${mode === 'monday' ? 'Monday' : 'Current day'}`);
+                }}
+                availableTags={customTags}
+                onAddTag={(tag) => {
+                  const newTag = { ...tag, id: `tag-${Date.now()}` };
+                  setCustomTags(prev => [...prev, newTag]);
+                  console.log(`Tag "${tag.text}" added`);
+                }}
+                onEditTag={(id, tag) => {
+                  setCustomTags(prev => prev.map(t => t.id === id ? { ...tag, id } : t));
+                  console.log(`Tag "${tag.text}" updated`);
+                }}
+                onDeleteTag={(id) => {
+                  setCustomTags(prev => prev.filter(t => t.id !== id));
+                  console.log('Tag deleted');
+                }}
+              />
+            </RightSidePanel>
+          )}
+
+          {/* Features accessed through menu panel will be handled separately */}
         </div>
       )}
 
       {/* Mobile Layout */}
       {isMobile && (
-        <div className="flex flex-col h-screen">
-          {activePanel === "timeline" && (
-            <MobileTodayAgenda
-              tasks={getTodayTasks()}
-              onTaskUpdate={handleTaskUpdate}
-              onTaskArchive={handleArchiveTask}
-              onTaskDelete={handleTaskDelete}
-            />
-          )}
-          {activePanel !== "timeline" && (
-            <div className="flex-1 overflow-hidden">
-              {renderMainContent()}
-            </div>
-          )}
+        <div className="mobile-layout flex flex-col h-screen w-full">
+          <div className="flex-1 overflow-hidden">
+            {/* Mobile content for panels */}
+            {activePanel === "inbox" && (
+              <div className="h-full w-full p-4">
+                <h2 className="text-xl font-bold mb-4">Inbox</h2>
+                <div className="space-y-2">
+                  {getInboxTasks().map((task) => (
+                    <div
+                      key={task.id}
+                      onClick={() => handleTaskClick(task)}
+                      className="p-3 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50"
+                    >
+                      <h3 className="font-medium">{task.title}</h3>
+                      {task.description && (
+                        <p className="text-sm text-gray-600 mt-1">{task.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {activePanel === "calendar" && (
+              <div className="h-full w-full">
+                <CalendarPanel
+                  tasks={tasks}
+                  onTaskStatusChange={handleTaskStatusChange}
+                  onTaskClick={(taskId) => {
+                    const task = tasks.find(t => t.id === taskId);
+                    if (task) handleTaskClick(task);
+                  }}
+                />
+              </div>
+            )}
+            {activePanel === "menu" && (
+              <div className="h-full w-full">
+                <SettingsPanel
+                  tasksPerDayLimit={5}
+                  onTasksPerDayLimitChange={(limit) => {
+                    console.log(`Tasks per day limit set to ${limit}`);
+                  }}
+                  weekStartMode="monday"
+                  onWeekStartModeChange={(mode) => {
+                    console.log(`Week starts on ${mode === 'monday' ? 'Monday' : 'Current day'}`);
+                  }}
+                  availableTags={customTags}
+                  onAddTag={(tag) => {
+                    const newTag = { ...tag, id: `tag-${Date.now()}` };
+                    setCustomTags(prev => [...prev, newTag]);
+                    console.log(`Tag "${tag.text}" added`);
+                  }}
+                  onEditTag={(id, tag) => {
+                    setCustomTags(prev => prev.map(t => t.id === id ? { ...tag, id } : t));
+                    console.log(`Tag "${tag.text}" updated`);
+                  }}
+                  onDeleteTag={(id) => {
+                    setCustomTags(prev => prev.filter(t => t.id !== id));
+                    console.log('Tag deleted');
+                  }}
+                />
+              </div>
+            )}
+            {activePanel === "settings" && (
+              <div className="h-full w-full">
+                <SettingsPanel
+                  tasksPerDayLimit={5}
+                  onTasksPerDayLimitChange={(limit) => {
+                    console.log(`Tasks per day limit set to ${limit}`);
+                  }}
+                  weekStartMode="monday"
+                  onWeekStartModeChange={(mode) => {
+                    console.log(`Week starts on ${mode === 'monday' ? 'Monday' : 'Current day'}`);
+                  }}
+                  availableTags={customTags}
+                  onAddTag={(tag) => {
+                    const newTag = { ...tag, id: `tag-${Date.now()}` };
+                    setCustomTags(prev => [...prev, newTag]);
+                    console.log(`Tag "${tag.text}" added`);
+                  }}
+                  onEditTag={(id, tag) => {
+                    setCustomTags(prev => prev.map(t => t.id === id ? { ...tag, id } : t));
+                    console.log(`Tag "${tag.text}" updated`);
+                  }}
+                  onDeleteTag={(id) => {
+                    setCustomTags(prev => prev.filter(t => t.id !== id));
+                    console.log('Tag deleted');
+                  }}
+                />
+              </div>
+            )}
+            {!activePanel && (
+              <div className="h-full w-full">
+                <MobileTodayAgenda
+                  tasks={getTodayTasks()}
+                  onTaskClick={(taskId) => {
+                    const task = tasks.find(t => t.id === taskId);
+                    if (task) handleTaskClick(task);
+                  }}
+                  onTaskStatusChange={handleTaskStatusChange}
+                  onAddTask={() => setShowAddTaskModal(true)}
+                />
+              </div>
+            )}
+          </div>
           <MobileBottomNav
             activePanel={activePanel}
-            onPanelChange={setActivePanel}
+            onPanelChange={(panel) => {
+              if (typeof panel === 'string') {
+                setActivePanel(panel as "inbox" | "calendar" | "menu");
+              }
+            }}
             onAddTask={() => setShowAddTaskModal(true)}
           />
         </div>
@@ -662,9 +797,9 @@ function TaskZMApp({}: TaskZMAppProps) {
       {/* Add Task Modal */}
       {showAddTaskModal && (
         <AddTaskModal
+          isOpen={showAddTaskModal}
           onClose={() => setShowAddTaskModal(false)}
-          onTaskCreate={handleTaskCreate}
-          customTags={customTags}
+          onAddTask={handleTaskCreate}
         />
       )}
 
@@ -825,34 +960,34 @@ function TaskZMApp({}: TaskZMAppProps) {
 
       {/* Settings Panel */}
       <RightSidePanel
-        isOpen={activePanel === "settings"}
-        onClose={() => setActivePanel("timeline")}
+        isOpen={showAccessibility}
+        onClose={() => setShowAccessibility(false)}
         title="Settings"
       >
         <SettingsPanel
           tasksPerDayLimit={5}
           onTasksPerDayLimitChange={(limit) => {
             // Handle tasks per day limit change
-            toast.success(`Tasks per day limit set to ${limit}`);
+            console.log(`Tasks per day limit set to ${limit}`);
           }}
           weekStartMode="monday"
           onWeekStartModeChange={(mode) => {
             // Handle week start mode change
-            toast.success(`Week starts on ${mode === 'monday' ? 'Monday' : 'Current day'}`);
+            console.log(`Week starts on ${mode === 'monday' ? 'Monday' : 'Current day'}`);
           }}
           availableTags={customTags}
           onAddTag={(tag) => {
             const newTag = { ...tag, id: `tag-${Date.now()}` };
             setCustomTags(prev => [...prev, newTag]);
-            toast.success(`Tag "${tag.name}" added`);
+            console.log(`Tag "${tag.text}" added`);
           }}
           onEditTag={(id, tag) => {
             setCustomTags(prev => prev.map(t => t.id === id ? { ...tag, id } : t));
-            toast.success(`Tag "${tag.name}" updated`);
+            console.log(`Tag "${tag.text}" updated`);
           }}
           onDeleteTag={(id) => {
             setCustomTags(prev => prev.filter(t => t.id !== id));
-            toast.success('Tag deleted');
+            console.log('Tag deleted');
           }}
         />
       </RightSidePanel>

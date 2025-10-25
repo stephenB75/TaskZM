@@ -5,6 +5,7 @@ import {
   Calendar,
   Sparkles,
   Plus,
+  Settings,
 } from "lucide-react";
 
 interface WeekNavigationProps {
@@ -15,6 +16,7 @@ interface WeekNavigationProps {
   onAddTask?: () => void;
   viewMode?: "week" | "month";
   onViewModeChange?: (mode: "week" | "month") => void;
+  onOpenSettings?: () => void;
 }
 
 export default function WeekNavigation({
@@ -25,6 +27,7 @@ export default function WeekNavigation({
   onAddTask,
   viewMode = "week",
   onViewModeChange,
+  onOpenSettings,
 }: WeekNavigationProps) {
   const getWeekStart = (date: Date) => {
     // Return the date as-is for rolling 7-day view
@@ -41,20 +44,11 @@ export default function WeekNavigation({
   };
 
   const formatWeekRange = (startDate: Date) => {
-    const endDate = getWeekEnd(startDate);
-    const startMonth = startDate.toLocaleDateString("en-US", {
-      month: "short",
-    });
-    const endMonth = endDate.toLocaleDateString("en-US", {
-      month: "short",
+    const month = startDate.toLocaleDateString("en-US", {
+      month: "long",
     });
     const year = startDate.getFullYear();
-
-    if (startMonth === endMonth) {
-      return `${startMonth} ${startDate.getDate()}-${endDate.getDate()}, ${year}`;
-    } else {
-      return `${startMonth} ${startDate.getDate()} - ${endMonth} ${endDate.getDate()}, ${year}`;
-    }
+    return `${month} ${year}`;
   };
 
   const goToPreviousWeek = () => {
@@ -92,7 +86,7 @@ export default function WeekNavigation({
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <span
-            className="font-['DM_Sans:Medium',_sans-serif] font-semibold text-[18px] text-[#313131] text-heading"
+            className="font-['DM_Sans:Bold',_sans-serif] font-bold leading-[23px] relative shrink-0 text-[#313131] text-[21px]"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             {formatWeekRange(currentWeek)}
@@ -105,7 +99,7 @@ export default function WeekNavigation({
             title="Go to Current Week"
           >
             <span
-              className="font-['DM_Sans:Medium',_sans-serif] font-medium text-[14px] text-subheading"
+              className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[16px] relative shrink-0 text-[#828282] text-[13px]"
               style={{ fontVariationSettings: "'opsz' 14" }}
             >
               Today
@@ -122,7 +116,7 @@ export default function WeekNavigation({
           >
             <Sparkles className="w-5 h-5" />
             <span
-              className="font-['DM_Sans:Medium',_sans-serif] font-medium text-[14px] text-subheading"
+              className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[16px] relative shrink-0 text-[#828282] text-[13px]"
               style={{ fontVariationSettings: "'opsz' 14" }}
             >
               {isScheduling ? "Scheduling..." : "AI Schedule"}
@@ -130,21 +124,6 @@ export default function WeekNavigation({
           </button>
         )}
 
-        {onAddTask && (
-          <button
-            onClick={onAddTask}
-            className="flex items-center gap-2 px-3 py-2 text-[#828282] hover:text-[#313131] hover:bg-gray-100 rounded-md transition-colors"
-            title="Add New Task"
-          >
-            <Plus className="w-5 h-5" />
-            <span
-              className="font-['DM_Sans:Medium',_sans-serif] font-medium text-[14px]"
-              style={{ fontVariationSettings: "'opsz' 14" }}
-            >
-              Add Task
-            </span>
-          </button>
-        )}
       </div>
 
       {/* Navigation Controls */}
@@ -184,6 +163,22 @@ export default function WeekNavigation({
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             {viewMode === "week" ? "Week View" : "Month View"}
+          </span>
+        </button>
+
+        <div className="w-px h-6 bg-[#e3e3e3] mx-2" />
+
+        <button
+          onClick={onOpenSettings}
+          className="flex items-center gap-2 px-3 py-2 text-[#828282] hover:text-[#313131] hover:bg-gray-100 rounded-md transition-colors"
+          title="Settings"
+        >
+          <Settings className="w-5 h-5" />
+          <span
+            className="font-['DM_Sans:Medium',_sans-serif] font-medium text-[14px]"
+            style={{ fontVariationSettings: "'opsz' 14" }}
+          >
+            Settings
           </span>
         </button>
       </div>

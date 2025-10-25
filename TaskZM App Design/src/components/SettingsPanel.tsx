@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { User, Calendar, Sparkles, Bell, Info, CreditCard, Clock, RotateCcw, Briefcase, Tags } from 'lucide-react';
+import { Settings, User, Bell, Clock, Eye, Brain, Tags, Palette, Shield, CreditCard } from 'lucide-react';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Separator } from './ui/separator';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
+import { Slider } from './ui/slider';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import TagManager, { TagDefinition } from './TagManager';
 import { toast } from 'sonner';
 
@@ -32,6 +32,8 @@ export default function SettingsPanel({
   onEditTag,
   onDeleteTag,
 }: SettingsPanelProps) {
+  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
+  
   // User Profile State
   const [userName, setUserName] = useState(() => {
     return localStorage.getItem('userName') || 'John Doe';
@@ -39,31 +41,8 @@ export default function SettingsPanel({
   const [userEmail, setUserEmail] = useState(() => {
     return localStorage.getItem('userEmail') || 'john.doe@example.com';
   });
-  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
   
-  // Calendar Integration State
-  const [iCloudConnected, setICloudConnected] = useState(() => {
-    return localStorage.getItem('iCloudConnected') === 'true';
-  });
-  const [googleConnected, setGoogleConnected] = useState(() => {
-    return localStorage.getItem('googleConnected') === 'true';
-  });
-  const [yahooConnected, setYahooConnected] = useState(() => {
-    return localStorage.getItem('yahooConnected') === 'true';
-  });
-  
-  // AI Settings State
-  const [aiAutoSchedule, setAiAutoSchedule] = useState(() => {
-    return localStorage.getItem('aiAutoSchedule') !== 'false';
-  });
-  const [aiSmartSuggestions, setAiSmartSuggestions] = useState(() => {
-    return localStorage.getItem('aiSmartSuggestions') !== 'false';
-  });
-  const [aiPriorityDetection, setAiPriorityDetection] = useState(() => {
-    return localStorage.getItem('aiPriorityDetection') !== 'false';
-  });
-  
-  // Notification State
+  // Notification Settings
   const [pushNotifications, setPushNotifications] = useState(() => {
     return localStorage.getItem('pushNotifications') !== 'false';
   });
@@ -73,30 +52,16 @@ export default function SettingsPanel({
   const [taskReminders, setTaskReminders] = useState(() => {
     return localStorage.getItem('taskReminders') !== 'false';
   });
-  const [dailyDigest, setDailyDigest] = useState(() => {
-    return localStorage.getItem('dailyDigest') !== 'false';
-  });
   
-  // Date/Time State
+  // Date/Time Settings
   const [timeFormat, setTimeFormat] = useState<'12h' | '24h'>(() => {
     return (localStorage.getItem('timeFormat') as '12h' | '24h') || '12h';
   });
   const [dateFormat, setDateFormat] = useState<'US' | 'EU' | 'ISO'>(() => {
     return (localStorage.getItem('dateFormat') as 'US' | 'EU' | 'ISO') || 'US';
   });
-  const [timezone, setTimezone] = useState(() => {
-    return localStorage.getItem('timezone') || 'America/New_York';
-  });
   
-  // Task Rollover State
-  const [autoRollover, setAutoRollover] = useState(() => {
-    return localStorage.getItem('autoRollover') !== 'false';
-  });
-  const [rolloverTime, setRolloverTime] = useState(() => {
-    return localStorage.getItem('rolloverTime') || 'midnight';
-  });
-  
-  // Work Hours State
+  // Work Hours Settings
   const [workHoursEnabled, setWorkHoursEnabled] = useState(() => {
     return localStorage.getItem('workHoursEnabled') !== 'false';
   });
@@ -106,881 +71,568 @@ export default function SettingsPanel({
   const [workEndTime, setWorkEndTime] = useState(() => {
     return localStorage.getItem('workEndTime') || '17:00';
   });
-  const [personalHoursEnabled, setPersonalHoursEnabled] = useState(() => {
-    return localStorage.getItem('personalHoursEnabled') === 'true';
+  
+  // ADHD Accessibility Settings
+  const [focusMode, setFocusMode] = useState(() => {
+    return localStorage.getItem('focusMode') === 'true';
   });
-  const [personalStartTime, setPersonalStartTime] = useState(() => {
-    return localStorage.getItem('personalStartTime') || '18:00';
+  const [visualCalmMode, setVisualCalmMode] = useState(() => {
+    return localStorage.getItem('visualCalmMode') === 'true';
   });
-  const [personalEndTime, setPersonalEndTime] = useState(() => {
-    return localStorage.getItem('personalEndTime') || '21:00';
+  const [timeAwareness, setTimeAwareness] = useState(() => {
+    return localStorage.getItem('timeAwareness') !== 'false';
+  });
+  const [doNotDisturb, setDoNotDisturb] = useState(() => {
+    return localStorage.getItem('doNotDisturb') === 'true';
+  });
+  const [celebrateCompletions, setCelebrateCompletions] = useState(() => {
+    return localStorage.getItem('celebrateCompletions') !== 'false';
+  });
+  const [pomodoroEnabled, setPomodoroEnabled] = useState(() => {
+    return localStorage.getItem('pomodoroEnabled') === 'true';
   });
   
-  // Subscription State
-  const [subscriptionTier, setSubscriptionTier] = useState('pro');
-  const [renewalDate, setRenewalDate] = useState('March 15, 2025');
+  // Theme Settings
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'light';
+  });
   
-  // Save Profile Handler
-  const handleSaveProfile = () => {
+  // Data & Privacy Settings
+  const [dataSharing, setDataSharing] = useState(() => {
+    return localStorage.getItem('dataSharing') !== 'false';
+  });
+  const [analytics, setAnalytics] = useState(() => {
+    return localStorage.getItem('analytics') !== 'false';
+  });
+
+  // Status indicator for debugging
+  const [settingsStatus, setSettingsStatus] = useState('Ready');
+
+  const handleSave = () => {
+    setSettingsStatus('Saving...');
+    console.log('Saving settings...', { 
+      focusMode, 
+      visualCalmMode, 
+      doNotDisturb, 
+      theme,
+      pushNotifications,
+      emailNotifications,
+      taskReminders
+    });
+    
+    // Save all settings to localStorage
     localStorage.setItem('userName', userName);
     localStorage.setItem('userEmail', userEmail);
-    toast.success('Profile saved successfully', {
-      description: 'Your profile information has been updated'
-    });
+    localStorage.setItem('pushNotifications', pushNotifications.toString());
+    localStorage.setItem('emailNotifications', emailNotifications.toString());
+    localStorage.setItem('taskReminders', taskReminders.toString());
+    localStorage.setItem('timeFormat', timeFormat);
+    localStorage.setItem('dateFormat', dateFormat);
+    localStorage.setItem('workHoursEnabled', workHoursEnabled.toString());
+    localStorage.setItem('workStartTime', workStartTime);
+    localStorage.setItem('workEndTime', workEndTime);
+    localStorage.setItem('focusMode', focusMode.toString());
+    localStorage.setItem('visualCalmMode', visualCalmMode.toString());
+    localStorage.setItem('timeAwareness', timeAwareness.toString());
+    localStorage.setItem('doNotDisturb', doNotDisturb.toString());
+    localStorage.setItem('celebrateCompletions', celebrateCompletions.toString());
+    localStorage.setItem('pomodoroEnabled', pomodoroEnabled.toString());
+    localStorage.setItem('theme', theme);
+    localStorage.setItem('dataSharing', dataSharing.toString());
+    localStorage.setItem('analytics', analytics.toString());
+    
+    // Apply settings immediately
+    applySettings();
+    
+    setSettingsStatus('Settings saved!');
+    toast.success('Settings saved successfully');
+    
+    // Reset status after 2 seconds
+    setTimeout(() => setSettingsStatus('Ready'), 2000);
   };
-  
-  // Calendar Connection Handlers
-  const handleICloudToggle = (checked: boolean) => {
-    setICloudConnected(checked);
-    localStorage.setItem('iCloudConnected', checked.toString());
-    if (checked) {
-      toast.success('iCloud Calendar connected', {
-        description: 'Your iCloud calendar is now synced with your tasks'
-      });
+
+  const applySettings = () => {
+    console.log('Applying settings...', { focusMode, visualCalmMode, doNotDisturb, theme });
+    
+    // Apply theme
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else if (theme === 'light') {
+      root.classList.remove('dark');
     } else {
-      toast.info('iCloud Calendar disconnected');
+      // System theme
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    }
+
+    // Apply ADHD settings to app container
+    const appContainer = document.querySelector('.min-h-screen');
+    if (appContainer) {
+      appContainer.classList.toggle('focus-mode', focusMode);
+      appContainer.classList.toggle('calm-mode', visualCalmMode);
+      appContainer.classList.toggle('do-not-disturb', doNotDisturb);
+    }
+
+    // Apply time format globally
+    document.documentElement.setAttribute('data-time-format', timeFormat);
+    document.documentElement.setAttribute('data-date-format', dateFormat);
+
+    // Apply work hours
+    document.documentElement.setAttribute('data-work-hours-enabled', workHoursEnabled.toString());
+    if (workHoursEnabled) {
+      document.documentElement.setAttribute('data-work-start', workStartTime);
+      document.documentElement.setAttribute('data-work-end', workEndTime);
+    }
+
+    // Apply notification settings
+    document.documentElement.setAttribute('data-push-notifications', pushNotifications.toString());
+    document.documentElement.setAttribute('data-email-notifications', emailNotifications.toString());
+    document.documentElement.setAttribute('data-task-reminders', taskReminders.toString());
+
+    // Apply ADHD accessibility settings
+    document.documentElement.setAttribute('data-time-awareness', timeAwareness.toString());
+    document.documentElement.setAttribute('data-celebrate-completions', celebrateCompletions.toString());
+    document.documentElement.setAttribute('data-pomodoro-enabled', pomodoroEnabled.toString());
+
+    // Apply privacy settings
+    document.documentElement.setAttribute('data-data-sharing', dataSharing.toString());
+    document.documentElement.setAttribute('data-analytics', analytics.toString());
+  };
+
+  // Apply settings on component mount
+  useEffect(() => {
+    applySettings();
+  }, [focusMode, visualCalmMode, doNotDisturb, theme, timeFormat, dateFormat, workHoursEnabled, workStartTime, workEndTime, pushNotifications, emailNotifications, taskReminders, timeAwareness, celebrateCompletions, pomodoroEnabled, dataSharing, analytics]);
+
+  // Handle individual setting changes
+  const handleNotificationChange = (type: string, value: boolean) => {
+    console.log(`Notification change: ${type} = ${value}`);
+    setSettingsStatus(`Updated ${type} notification`);
+    switch (type) {
+      case 'push':
+        setPushNotifications(value);
+        break;
+      case 'email':
+        setEmailNotifications(value);
+        break;
+      case 'reminders':
+        setTaskReminders(value);
+        break;
+    }
+    // Reset status after 1 second
+    setTimeout(() => setSettingsStatus('Ready'), 1000);
+  };
+
+  const handleADHDSettingChange = (type: string, value: boolean) => {
+    console.log(`ADHD setting change: ${type} = ${value}`);
+    setSettingsStatus(`Updated ${type} setting`);
+    switch (type) {
+      case 'focus':
+        setFocusMode(value);
+        break;
+      case 'calm':
+        setVisualCalmMode(value);
+        break;
+      case 'time':
+        setTimeAwareness(value);
+        break;
+      case 'disturb':
+        setDoNotDisturb(value);
+        break;
+      case 'celebrate':
+        setCelebrateCompletions(value);
+        break;
+      case 'pomodoro':
+        setPomodoroEnabled(value);
+        break;
+    }
+    // Reset status after 1 second
+    setTimeout(() => setSettingsStatus('Ready'), 1000);
+  };
+
+  const handlePrivacyChange = (type: string, value: boolean) => {
+    switch (type) {
+      case 'data':
+        setDataSharing(value);
+        break;
+      case 'analytics':
+        setAnalytics(value);
+        break;
     }
   };
-  
-  const handleGoogleToggle = (checked: boolean) => {
-    setGoogleConnected(checked);
-    localStorage.setItem('googleConnected', checked.toString());
-    if (checked) {
-      toast.success('Google Calendar connected', {
-        description: 'Your Google calendar is now synced with your tasks'
-      });
+
+  // Handle theme change with immediate application
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme);
+    // Apply theme immediately
+    const root = document.documentElement;
+    if (newTheme === 'dark') {
+      root.classList.add('dark');
+    } else if (newTheme === 'light') {
+      root.classList.remove('dark');
     } else {
-      toast.info('Google Calendar disconnected');
+      // System theme
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
     }
   };
-  
-  const handleYahooToggle = (checked: boolean) => {
-    setYahooConnected(checked);
-    localStorage.setItem('yahooConnected', checked.toString());
-    if (checked) {
-      toast.success('Yahoo Calendar connected', {
-        description: 'Your Yahoo calendar is now synced with your tasks'
-      });
-    } else {
-      toast.info('Yahoo Calendar disconnected');
-    }
+
+  // Handle time format change with immediate application
+  const handleTimeFormatChange = (newFormat: string) => {
+    setTimeFormat(newFormat as '12h' | '24h');
+    document.documentElement.setAttribute('data-time-format', newFormat);
   };
-  
-  // AI Settings Handlers
-  const handleAiAutoScheduleToggle = (checked: boolean) => {
-    setAiAutoSchedule(checked);
-    localStorage.setItem('aiAutoSchedule', checked.toString());
-    toast.success(checked ? 'AI Auto-Schedule enabled' : 'AI Auto-Schedule disabled');
+
+  // Handle date format change with immediate application
+  const handleDateFormatChange = (newFormat: string) => {
+    setDateFormat(newFormat as 'US' | 'EU' | 'ISO');
+    document.documentElement.setAttribute('data-date-format', newFormat);
   };
-  
-  const handleAiSmartSuggestionsToggle = (checked: boolean) => {
-    setAiSmartSuggestions(checked);
-    localStorage.setItem('aiSmartSuggestions', checked.toString());
-    toast.success(checked ? 'Smart Suggestions enabled' : 'Smart Suggestions disabled');
-  };
-  
-  const handleAiPriorityDetectionToggle = (checked: boolean) => {
-    setAiPriorityDetection(checked);
-    localStorage.setItem('aiPriorityDetection', checked.toString());
-    toast.success(checked ? 'Priority Detection enabled' : 'Priority Detection disabled');
-  };
-  
-  // Notification Handlers
-  const handlePushNotificationsToggle = (checked: boolean) => {
-    setPushNotifications(checked);
-    localStorage.setItem('pushNotifications', checked.toString());
-    toast.success(checked ? 'Push Notifications enabled' : 'Push Notifications disabled');
-  };
-  
-  const handleEmailNotificationsToggle = (checked: boolean) => {
-    setEmailNotifications(checked);
-    localStorage.setItem('emailNotifications', checked.toString());
-    toast.success(checked ? 'Email Notifications enabled' : 'Email Notifications disabled');
-  };
-  
-  const handleTaskRemindersToggle = (checked: boolean) => {
-    setTaskReminders(checked);
-    localStorage.setItem('taskReminders', checked.toString());
-    toast.success(checked ? 'Task Reminders enabled' : 'Task Reminders disabled');
-  };
-  
-  const handleDailyDigestToggle = (checked: boolean) => {
-    setDailyDigest(checked);
-    localStorage.setItem('dailyDigest', checked.toString());
-    toast.success(checked ? 'Daily Digest enabled' : 'Daily Digest disabled');
-  };
-  
-  // Date/Time Handlers
-  const handleTimeFormatChange = (value: '12h' | '24h') => {
-    setTimeFormat(value);
-    localStorage.setItem('timeFormat', value);
-    toast.success('Time format updated', {
-      description: `Changed to ${value === '12h' ? '12-hour' : '24-hour'} format`
-    });
-  };
-  
-  const handleDateFormatChange = (value: 'US' | 'EU' | 'ISO') => {
-    setDateFormat(value);
-    localStorage.setItem('dateFormat', value);
-    const formatName = value === 'US' ? 'MM/DD/YYYY' : value === 'EU' ? 'DD/MM/YYYY' : 'YYYY-MM-DD';
-    toast.success('Date format updated', {
-      description: `Changed to ${formatName}`
-    });
-  };
-  
-  const handleTimezoneChange = (value: string) => {
-    setTimezone(value);
-    localStorage.setItem('timezone', value);
-    toast.success('Timezone updated', {
-      description: `Timezone changed to ${value.split('/')[1]?.replace('_', ' ')}`
-    });
-  };
-  
-  // Task Rollover Handlers
-  const handleAutoRolloverToggle = (checked: boolean) => {
-    setAutoRollover(checked);
-    localStorage.setItem('autoRollover', checked.toString());
-    toast.success(checked ? 'Auto Rollover enabled' : 'Auto Rollover disabled', {
-      description: checked ? 'Incomplete tasks will move to the next day' : 'Tasks will stay on their assigned day'
-    });
-  };
-  
-  const handleRolloverTimeChange = (value: string) => {
-    setRolloverTime(value);
-    localStorage.setItem('rolloverTime', value);
-    toast.success('Rollover time updated');
-  };
-  
-  // Work Hours Handlers
-  const handleWorkHoursToggle = (checked: boolean) => {
-    setWorkHoursEnabled(checked);
-    localStorage.setItem('workHoursEnabled', checked.toString());
-    toast.success(checked ? 'Work Hours enabled' : 'Work Hours disabled');
-  };
-  
-  const handleWorkStartTimeChange = (value: string) => {
-    setWorkStartTime(value);
-    localStorage.setItem('workStartTime', value);
-  };
-  
-  const handleWorkEndTimeChange = (value: string) => {
-    setWorkEndTime(value);
-    localStorage.setItem('workEndTime', value);
-  };
-  
-  const handlePersonalHoursToggle = (checked: boolean) => {
-    setPersonalHoursEnabled(checked);
-    localStorage.setItem('personalHoursEnabled', checked.toString());
-    toast.success(checked ? 'Personal Hours enabled' : 'Personal Hours disabled');
-  };
-  
-  const handlePersonalStartTimeChange = (value: string) => {
-    setPersonalStartTime(value);
-    localStorage.setItem('personalStartTime', value);
-  };
-  
-  const handlePersonalEndTimeChange = (value: string) => {
-    setPersonalEndTime(value);
-    localStorage.setItem('personalEndTime', value);
-  };
-  
-  // Subscription Handlers
-  const handleManageSubscription = () => {
-    toast.info('Opening subscription management', {
-      description: 'This would open your subscription settings in the App Store'
-    });
-  };
-  
-  // About Handlers
-  const handlePrivacyPolicy = () => {
-    toast.info('Privacy Policy', {
-      description: 'This would open the privacy policy page'
-    });
-  };
-  
-  const handleTermsOfService = () => {
-    toast.info('Terms of Service', {
-      description: 'This would open the terms of service page'
-    });
-  };
-  
-  const handleHelpSupport = () => {
-    toast.info('Help & Support', {
-      description: 'This would open the help center'
-    });
-  };
-  
-  const handleChangePhoto = () => {
-    toast.info('Change Photo', {
-      description: 'This would open the photo picker'
-    });
+
+  // Reset to defaults
+  const handleReset = () => {
+    setUserName('John Doe');
+    setUserEmail('john.doe@example.com');
+    setPushNotifications(true);
+    setEmailNotifications(false);
+    setTaskReminders(true);
+    setTimeFormat('12h');
+    setDateFormat('US');
+    setWorkHoursEnabled(false);
+    setWorkStartTime('09:00');
+    setWorkEndTime('17:00');
+    setFocusMode(false);
+    setVisualCalmMode(false);
+    setTimeAwareness(true);
+    setDoNotDisturb(false);
+    setCelebrateCompletions(true);
+    setPomodoroEnabled(false);
+    setTheme('light');
+    setDataSharing(true);
+    setAnalytics(true);
+    
+    toast.success('Settings reset to defaults');
   };
 
   return (
-    <div className="w-full md:w-[400px] h-screen flex-shrink-0 bg-[#e9f7e9] md:border-l border-[#e3e3e3] flex flex-col">
+    <div className="w-full md:w-[315px] h-full md:h-screen bg-white md:border-l border-[#e5e7eb] flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-[#e3e3e3]">
-        <h2 className="font-['DM_Sans:Bold',_sans-serif] text-[20px] text-[#313131] text-heading">
+      <div className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-[#e5e7eb]">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-[#3300ff]/10 rounded-lg flex items-center justify-center">
+            <Settings className="w-5 h-5 text-[#3300ff]" />
+          </div>
+          <div>
+            <h2 className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[20px] relative shrink-0 text-[#313131] text-[18px]"
+                style={{ fontVariationSettings: "'opsz' 14" }}>
           Settings
         </h2>
-        <p className="text-[12px] text-[#828282] mt-1 text-caption">
-          Customize your task manager
+            <p className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] relative shrink-0 text-[#828282] text-[10px]"
+               style={{ fontVariationSettings: "'opsz' 14" }}>
+              Customize your workflow
         </p>
+          </div>
+        </div>
       </div>
 
       {/* Settings Content */}
-      <div className="flex-1 overflow-y-auto">
-        <Accordion type="multiple" defaultValue={['profile', 'ai']} className="w-full">
-          {/* User Profile Settings */}
-          <AccordionItem value="profile" className="border-b border-[#e3e3e3] px-6">
-            <AccordionTrigger className="py-4 hover:no-underline">
-              <div className="flex items-center gap-3">
+      <div className="flex-1 px-6 py-4 overflow-y-auto">
+        <Accordion type="multiple" className="w-full">
+          {/* User Profile */}
+          <AccordionItem value="user-profile">
+            <AccordionTrigger className="flex items-center gap-2 text-[15px] font-medium text-[#313131]">
                 <User className="w-4 h-4 text-[#3300ff]" />
-                <span className="font-['DM_Sans:Medium',_sans-serif] text-[14px] text-[#313131]">
                   User Profile
-                </span>
-              </div>
             </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-4">
-              <div className="flex items-center gap-4 mb-4">
-                <Avatar className="w-16 h-16">
-                  <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userName}`} />
-                  <AvatarFallback>{userName.split(' ').map(n => n[0]).join('').toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <Button variant="outline" className="text-[12px] h-8" onClick={handleChangePhoto}>
-                  Change Photo
-                </Button>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="user-name" className="text-[13px] text-[#313131]">
-                  Name
-                </Label>
+            <AccordionContent className="space-y-4 p-4">
+              <div>
+                <Label className="text-[12px] text-[#828282]">Name</Label>
                 <Input
-                  id="user-name"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  className="h-9 text-[13px]"
+                  className="w-full"
                 />
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="user-email" className="text-[13px] text-[#313131]">
-                  Email
-                </Label>
+              <div>
+                <Label className="text-[12px] text-[#828282]">Email</Label>
                 <Input
-                  id="user-email"
                   type="email"
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
-                  className="h-9 text-[13px]"
-                />
-              </div>
-              
-              <Button className="w-full bg-[#3300ff] hover:bg-[#2200cc] h-9 text-[13px]" onClick={handleSaveProfile}>
-                Save Profile
-              </Button>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Calendar Integration */}
-          <AccordionItem value="calendar" className="border-b border-[#e3e3e3] px-6">
-            <AccordionTrigger className="py-4 hover:no-underline">
-              <div className="flex items-center gap-3">
-                <Calendar className="w-4 h-4 text-[#3300ff]" />
-                <span className="font-['DM_Sans:Medium',_sans-serif] text-[14px] text-[#313131]">
-                  Calendar Integration
-                </span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-4">
-              <p className="text-[12px] text-[#828282] mb-3">
-                Connect your calendars to sync tasks and events
-              </p>
-              
-              {/* iCloud */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#0071e3] flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17.9 10.9c-.1-2.7 2.2-4 2.3-4.1-1.3-1.8-3.2-2.1-3.9-2.1-1.6-.2-3.2.9-4 .9-.9 0-2.2-.9-3.6-.9-1.9 0-3.6 1.1-4.5 2.7-2 3.4-.5 8.5 1.4 11.3 1 1.4 2.1 2.9 3.6 2.8 1.4-.1 2-.9 3.6-.9 1.6 0 2.1.9 3.6.9 1.5 0 2.5-1.3 3.5-2.7 1.1-1.6 1.6-3.1 1.6-3.2-.1 0-3.1-1.2-3.2-4.7zM15.5 3.7c.8-1 1.4-2.4 1.2-3.7-1.2 0-2.7.8-3.5 1.8-.7.8-1.4 2.2-1.2 3.5 1.3.1 2.7-.7 3.5-1.6z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-[13px] text-[#313131] font-medium">iCloud Calendar</p>
-                    <p className="text-[11px] text-[#828282]">
-                      {iCloudConnected ? 'Connected' : 'Not connected'}
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={iCloudConnected}
-                  onCheckedChange={handleICloudToggle}
-                />
-              </div>
-              
-              {/* Google Calendar */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-white border border-[#e3e3e3] flex items-center justify-center">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-[13px] text-[#313131] font-medium">Google Calendar</p>
-                    <p className="text-[11px] text-[#828282]">
-                      {googleConnected ? 'Connected' : 'Not connected'}
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={googleConnected}
-                  onCheckedChange={handleGoogleToggle}
-                />
-              </div>
-              
-              {/* Yahoo Calendar */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#6001d2] flex items-center justify-center">
-                    <span className="text-white font-bold text-[14px]">Y!</span>
-                  </div>
-                  <div>
-                    <p className="text-[13px] text-[#313131] font-medium">Yahoo Calendar</p>
-                    <p className="text-[11px] text-[#828282]">
-                      {yahooConnected ? 'Connected' : 'Not connected'}
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={yahooConnected}
-                  onCheckedChange={handleYahooToggle}
+                  className="w-full"
                 />
               </div>
             </AccordionContent>
           </AccordionItem>
 
-          {/* Tags Management */}
-          <AccordionItem value="tags" className="border-b border-[#e3e3e3] px-6">
-            <AccordionTrigger className="py-4 hover:no-underline">
-              <div className="flex items-center gap-3">
-                <Tags className="w-4 h-4 text-[#3300ff]" />
-                <span className="font-['DM_Sans:Medium',_sans-serif] text-[14px] text-[#313131]">
-                  Tags Management
-                </span>
-              </div>
+          {/* Core Settings */}
+          <AccordionItem value="core-settings">
+            <AccordionTrigger className="flex items-center gap-2 text-[15px] font-medium text-[#313131]">
+              <Settings className="w-4 h-4 text-[#3300ff]" />
+              Core Settings
             </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-4">
-              <p className="text-[12px] text-[#828282] mb-3">
-                Create and organize tags for your tasks
-              </p>
-              
-              <div className="space-y-2">
-                <div className="flex items-center justify-between mb-2">
-                  <Label className="text-[13px] text-[#313131]">
-                    Available Tags ({availableTags.length})
-                  </Label>
-                </div>
-                
-                {availableTags.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 p-3 bg-[#f8f9fa] rounded-lg">
-                    {availableTags.map((tag) => (
-                      <div
-                        key={tag.id}
-                        className="px-3 py-1 rounded text-xs"
-                        style={{
-                          backgroundColor: tag.bgColor,
-                          color: tag.textColor,
-                          fontWeight: tag.fontWeight === 'bold' ? 'bold' : '500'
-                        }}
-                      >
-                        {tag.text}
-                      </div>
-                    ))}
+            <AccordionContent className="space-y-4 p-4">
+                  <div>
+                <Label className="text-[12px] text-[#828282]">Tasks per day limit</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="20"
+                  value={tasksPerDayLimit}
+                  onChange={(e) => onTasksPerDayLimitChange(parseInt(e.target.value) || 6)}
+                  className="w-full"
+                />
                   </div>
-                ) : (
-                  <div className="p-4 bg-[#f8f9fa] rounded-lg text-center">
-                    <p className="text-[12px] text-[#828282]">No tags created yet</p>
-                  </div>
-                )}
-              </div>
-              
-              <Button 
-                className="w-full bg-[#3300ff] hover:bg-[#2200cc] h-9 text-[13px]"
-                onClick={() => setIsTagManagerOpen(true)}
-              >
-                <Tags className="w-4 h-4 mr-2" />
-                Manage Tags
-              </Button>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* AI Settings */}
-          <AccordionItem value="ai" className="border-b border-[#e3e3e3] px-6">
-            <AccordionTrigger className="py-4 hover:no-underline">
-              <div className="flex items-center gap-3">
-                <Sparkles className="w-4 h-4 text-[#3300ff]" />
-                <span className="font-['DM_Sans:Medium',_sans-serif] text-[14px] text-[#313131]">
-                  AI Settings
-                </span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-4">
-              {/* Tasks Per Day Limit */}
-              <div className="space-y-2">
-                <Label htmlFor="tasks-limit" className="text-[13px] text-[#313131]">
-                  Tasks Per Day Limit
-                </Label>
-                <Select 
-                  value={tasksPerDayLimit.toString()} 
-                  onValueChange={(value) => onTasksPerDayLimitChange(parseInt(value))}
-                >
-                  <SelectTrigger id="tasks-limit" className="w-full h-9">
+                  <div>
+                <Label className="text-[12px] text-[#828282]">Week start mode</Label>
+                <Select value={weekStartMode} onValueChange={onWeekStartModeChange}>
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="4">4 tasks</SelectItem>
-                    <SelectItem value="5">5 tasks</SelectItem>
-                    <SelectItem value="6">6 tasks (recommended)</SelectItem>
-                    <SelectItem value="7">7 tasks</SelectItem>
-                    <SelectItem value="8">8 tasks</SelectItem>
-                    <SelectItem value="10">10 tasks</SelectItem>
-                    <SelectItem value="12">12 tasks</SelectItem>
+                    <SelectItem value="current">Current day</SelectItem>
+                    <SelectItem value="monday">Monday</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-[11px] text-[#828282]">
-                  AI will schedule up to {tasksPerDayLimit} tasks per day
-                </p>
-              </div>
-              
-              <Separator />
-              
-              {/* AI Features */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[13px] text-[#313131] font-medium">Auto-Schedule</p>
-                    <p className="text-[11px] text-[#828282]">Automatically schedule new tasks</p>
-                  </div>
-                  <Switch
-                    checked={aiAutoSchedule}
-                    onCheckedChange={handleAiAutoScheduleToggle}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[13px] text-[#313131] font-medium">Smart Suggestions</p>
-                    <p className="text-[11px] text-[#828282]">Get AI-powered task suggestions</p>
-                  </div>
-                  <Switch
-                    checked={aiSmartSuggestions}
-                    onCheckedChange={handleAiSmartSuggestionsToggle}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[13px] text-[#313131] font-medium">Priority Detection</p>
-                    <p className="text-[11px] text-[#828282]">Auto-detect task priority</p>
-                  </div>
-                  <Switch
-                    checked={aiPriorityDetection}
-                    onCheckedChange={handleAiPriorityDetectionToggle}
-                  />
-                </div>
               </div>
             </AccordionContent>
           </AccordionItem>
-
           {/* Notifications */}
-          <AccordionItem value="notifications" className="border-b border-[#e3e3e3] px-6">
-            <AccordionTrigger className="py-4 hover:no-underline">
-              <div className="flex items-center gap-3">
+          <AccordionItem value="notifications">
+            <AccordionTrigger className="flex items-center gap-2 text-[15px] font-medium text-[#313131]">
                 <Bell className="w-4 h-4 text-[#3300ff]" />
-                <span className="font-['DM_Sans:Medium',_sans-serif] text-[14px] text-[#313131]">
                   Notifications
-                </span>
-              </div>
             </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-3">
+            <AccordionContent className="space-y-4 p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[13px] text-[#313131] font-medium">Push Notifications</p>
-                  <p className="text-[11px] text-[#828282]">Receive in-app notifications</p>
-                </div>
+                <Label className="text-[12px]">Push notifications</Label>
                 <Switch
                   checked={pushNotifications}
-                  onCheckedChange={handlePushNotificationsToggle}
+                  onCheckedChange={(value) => handleNotificationChange('push', value)} 
                 />
               </div>
-              
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[13px] text-[#313131] font-medium">Email Notifications</p>
-                  <p className="text-[11px] text-[#828282]">Get updates via email</p>
-                </div>
+                <Label className="text-[12px]">Email notifications</Label>
                 <Switch
                   checked={emailNotifications}
-                  onCheckedChange={handleEmailNotificationsToggle}
+                  onCheckedChange={(value) => handleNotificationChange('email', value)} 
                 />
               </div>
-              
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[13px] text-[#313131] font-medium">Task Reminders</p>
-                  <p className="text-[11px] text-[#828282]">Reminders before due dates</p>
-                </div>
+                <Label className="text-[12px]">Task reminders</Label>
                 <Switch
                   checked={taskReminders}
-                  onCheckedChange={handleTaskRemindersToggle}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[13px] text-[#313131] font-medium">Daily Digest</p>
-                  <p className="text-[11px] text-[#828282]">Daily summary of tasks</p>
-                </div>
-                <Switch
-                  checked={dailyDigest}
-                  onCheckedChange={handleDailyDigestToggle}
+                  onCheckedChange={(value) => handleNotificationChange('reminders', value)} 
                 />
               </div>
             </AccordionContent>
           </AccordionItem>
-
           {/* Date & Time */}
-          <AccordionItem value="datetime" className="border-b border-[#e3e3e3] px-6">
-            <AccordionTrigger className="py-4 hover:no-underline">
-              <div className="flex items-center gap-3">
+          <AccordionItem value="date-time">
+            <AccordionTrigger className="flex items-center gap-2 text-[15px] font-medium text-[#313131]">
                 <Clock className="w-4 h-4 text-[#3300ff]" />
-                <span className="font-['DM_Sans:Medium',_sans-serif] text-[14px] text-[#313131]">
                   Date & Time
-                </span>
-              </div>
             </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="week-start-mode" className="text-[13px] text-[#313131]">
-                  Week Start
-                </Label>
-                <Select value={weekStartMode} onValueChange={onWeekStartModeChange}>
-                  <SelectTrigger id="week-start-mode" className="w-full h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="current">Current Day (Rolling 7 days)</SelectItem>
-                    <SelectItem value="monday">Monday (Calendar Week)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="time-format" className="text-[13px] text-[#313131]">
-                  Time Format
-                </Label>
+            <AccordionContent className="space-y-4 p-4">
+              <div>
+                <Label className="text-[12px] text-[#828282]">Time format</Label>
                 <Select value={timeFormat} onValueChange={handleTimeFormatChange}>
-                  <SelectTrigger id="time-format" className="w-full h-9">
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="12h">12-hour (2:30 PM)</SelectItem>
-                    <SelectItem value="24h">24-hour (14:30)</SelectItem>
+                    <SelectItem value="12h">12-hour (AM/PM)</SelectItem>
+                    <SelectItem value="24h">24-hour</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="date-format" className="text-[13px] text-[#313131]">
-                  Date Format
-                </Label>
+              <div>
+                <Label className="text-[12px] text-[#828282]">Date format</Label>
                 <Select value={dateFormat} onValueChange={handleDateFormatChange}>
-                  <SelectTrigger id="date-format" className="w-full h-9">
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="US">US (MM/DD/YYYY)</SelectItem>
-                    <SelectItem value="EU">European (DD/MM/YYYY)</SelectItem>
-                    <SelectItem value="ISO">ISO (YYYY-MM-DD)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="timezone" className="text-[13px] text-[#313131]">
-                  Time Zone
-                </Label>
-                <Select value={timezone} onValueChange={handleTimezoneChange}>
-                  <SelectTrigger id="timezone" className="w-full h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
-                    <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
-                    <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
-                    <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
-                    <SelectItem value="Europe/London">London (GMT)</SelectItem>
-                    <SelectItem value="Europe/Paris">Paris (CET)</SelectItem>
-                    <SelectItem value="Asia/Tokyo">Tokyo (JST)</SelectItem>
+                    <SelectItem value="US">MM/DD/YYYY</SelectItem>
+                    <SelectItem value="EU">DD/MM/YYYY</SelectItem>
+                    <SelectItem value="ISO">YYYY-MM-DD</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </AccordionContent>
           </AccordionItem>
-
-          {/* Task Rollover */}
-          <AccordionItem value="rollover" className="border-b border-[#e3e3e3] px-6">
-            <AccordionTrigger className="py-4 hover:no-underline">
-              <div className="flex items-center gap-3">
-                <RotateCcw className="w-4 h-4 text-[#3300ff]" />
-                <span className="font-['DM_Sans:Medium',_sans-serif] text-[14px] text-[#313131]">
-                  Task Rollover
-                </span>
-              </div>
+          {/* Work Hours */}
+          <AccordionItem value="work-hours">
+            <AccordionTrigger className="flex items-center gap-2 text-[15px] font-medium text-[#313131]">
+              <Clock className="w-4 h-4 text-[#3300ff]" />
+              Work Hours
             </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-4">
+            <AccordionContent className="space-y-4 p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[13px] text-[#313131] font-medium">Auto Rollover</p>
-                  <p className="text-[11px] text-[#828282]">Move incomplete tasks to next day</p>
-                </div>
-                <Switch
-                  checked={autoRollover}
-                  onCheckedChange={handleAutoRolloverToggle}
-                />
+                <Label className="text-[12px]">Enable work hours</Label>
+                <Switch checked={workHoursEnabled} onCheckedChange={(value) => {
+                  setWorkHoursEnabled(value);
+                  if (!value) {
+                    setWorkStartTime('09:00');
+                    setWorkEndTime('17:00');
+                  }
+                }} />
               </div>
-              
-              {autoRollover && (
-                <div className="space-y-2">
-                  <Label htmlFor="rollover-time" className="text-[13px] text-[#313131]">
-                    Rollover Time
-                  </Label>
-                  <Select value={rolloverTime} onValueChange={handleRolloverTimeChange}>
-                    <SelectTrigger id="rollover-time" className="w-full h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="midnight">Midnight (12:00 AM)</SelectItem>
-                      <SelectItem value="early-morning">Early Morning (6:00 AM)</SelectItem>
-                      <SelectItem value="morning">Morning (9:00 AM)</SelectItem>
-                      <SelectItem value="manual">Manual Only</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-[11px] text-[#828282]">
-                    When to automatically move unfinished tasks
-                  </p>
-                </div>
-              )}
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Work/Personal Hours */}
-          <AccordionItem value="hours" className="border-b border-[#e3e3e3] px-6">
-            <AccordionTrigger className="py-4 hover:no-underline">
-              <div className="flex items-center gap-3">
-                <Briefcase className="w-4 h-4 text-[#3300ff]" />
-                <span className="font-['DM_Sans:Medium',_sans-serif] text-[14px] text-[#313131]">
-                  Work & Personal Hours
-                </span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-4">
-              {/* Work Hours */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-[13px] text-[#313131] font-medium">Work Hours</p>
-                  <Switch
-                    checked={workHoursEnabled}
-                    onCheckedChange={handleWorkHoursToggle}
-                  />
-                </div>
-                
                 {workHoursEnabled && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="work-start" className="text-[12px] text-[#828282]">
-                        Start Time
-                      </Label>
+                <>
+                  <div>
+                    <Label className="text-[12px] text-[#828282]">Start time</Label>
                       <Input
-                        id="work-start"
                         type="time"
                         value={workStartTime}
-                        onChange={(e) => handleWorkStartTimeChange(e.target.value)}
-                        className="h-9 text-[13px]"
+                      onChange={(e) => setWorkStartTime(e.target.value)}
+                      className="w-full"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="work-end" className="text-[12px] text-[#828282]">
-                        End Time
-                      </Label>
+                  <div>
+                    <Label className="text-[12px] text-[#828282]">End time</Label>
                       <Input
-                        id="work-end"
                         type="time"
                         value={workEndTime}
-                        onChange={(e) => handleWorkEndTimeChange(e.target.value)}
-                        className="h-9 text-[13px]"
+                      onChange={(e) => setWorkEndTime(e.target.value)}
+                      className="w-full"
                       />
-                    </div>
                   </div>
+                </>
                 )}
-              </div>
-              
-              <Separator />
-              
-              {/* Personal Hours */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-[13px] text-[#313131] font-medium">Personal Hours</p>
-                  <Switch
-                    checked={personalHoursEnabled}
-                    onCheckedChange={handlePersonalHoursToggle}
-                  />
-                </div>
-                
-                {personalHoursEnabled && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="personal-start" className="text-[12px] text-[#828282]">
-                        Start Time
-                      </Label>
-                      <Input
-                        id="personal-start"
-                        type="time"
-                        value={personalStartTime}
-                        onChange={(e) => handlePersonalStartTimeChange(e.target.value)}
-                        className="h-9 text-[13px]"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="personal-end" className="text-[12px] text-[#828282]">
-                        End Time
-                      </Label>
-                      <Input
-                        id="personal-end"
-                        type="time"
-                        value={personalEndTime}
-                        onChange={(e) => handlePersonalEndTimeChange(e.target.value)}
-                        className="h-9 text-[13px]"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <p className="text-[11px] text-[#828282] pt-2">
-                AI will prioritize work tasks during work hours and personal tasks during personal hours
-              </p>
             </AccordionContent>
           </AccordionItem>
-
-          {/* Subscription */}
-          <AccordionItem value="subscription" className="border-b border-[#e3e3e3] px-6">
-            <AccordionTrigger className="py-4 hover:no-underline">
-              <div className="flex items-center gap-3">
-                <CreditCard className="w-4 h-4 text-[#3300ff]" />
-                <span className="font-['DM_Sans:Medium',_sans-serif] text-[14px] text-[#313131]">
-                  Subscription
-                </span>
-              </div>
+          {/* ADHD Support */}
+          <AccordionItem value="adhd-support">
+            <AccordionTrigger className="flex items-center gap-2 text-[15px] font-medium text-[#313131]">
+              <Brain className="w-4 h-4 text-[#3300ff]" />
+              ADHD Support
             </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-4">
-              <div className="bg-gradient-to-br from-[#3300ff] to-[#5522ff] rounded-lg p-4 text-white">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="text-[16px] font-bold">Pro Plan</p>
-                    <p className="text-[12px] opacity-90">Billed via Apple</p>
-                  </div>
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17.9 10.9c-.1-2.7 2.2-4 2.3-4.1-1.3-1.8-3.2-2.1-3.9-2.1-1.6-.2-3.2.9-4 .9-.9 0-2.2-.9-3.6-.9-1.9 0-3.6 1.1-4.5 2.7-2 3.4-.5 8.5 1.4 11.3 1 1.4 2.1 2.9 3.6 2.8 1.4-.1 2-.9 3.6-.9 1.6 0 2.1.9 3.6.9 1.5 0 2.5-1.3 3.5-2.7 1.1-1.6 1.6-3.1 1.6-3.2-.1 0-3.1-1.2-3.2-4.7zM15.5 3.7c.8-1 1.4-2.4 1.2-3.7-1.2 0-2.7.8-3.5 1.8-.7.8-1.4 2.2-1.2 3.5 1.3.1 2.7-.7 3.5-1.6z"/>
-                    </svg>
-                  </div>
-                </div>
-                <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-[28px] font-bold">$9.99</span>
-                  <span className="text-[14px] opacity-90">/month</span>
-                </div>
-                <p className="text-[11px] opacity-80">Renews on {renewalDate}</p>
+            <AccordionContent className="space-y-4 p-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-[12px]">Focus mode</Label>
+                <Switch
+                  checked={focusMode} 
+                  onCheckedChange={(value) => handleADHDSettingChange('focus', value)} 
+                />
               </div>
-              
-              <div className="space-y-2">
-                <p className="text-[12px] font-medium text-[#313131]">Plan Features:</p>
-                <ul className="space-y-1 text-[12px] text-[#828282]">
-                  <li className="flex items-center gap-2">
-                    <span className="text-[#3300ff]">✓</span> Unlimited tasks
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-[#3300ff]">✓</span> AI scheduling & suggestions
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-[#3300ff]">✓</span> Calendar integrations
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <span className="text-[#3300ff]">✓</span> Priority support
-                  </li>
-                </ul>
+              <div className="flex items-center justify-between">
+                <Label className="text-[12px]">Visual calm mode</Label>
+                <Switch checked={visualCalmMode} onCheckedChange={(value) => handleADHDSettingChange('calm', value)} />
               </div>
-              
-              <Button variant="outline" className="w-full h-9 text-[13px]" onClick={handleManageSubscription}>
-                Manage Subscription
+              <div className="flex items-center justify-between">
+                <Label className="text-[12px]">Time awareness</Label>
+                <Switch checked={timeAwareness} onCheckedChange={(value) => handleADHDSettingChange('time', value)} />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label className="text-[12px]">Do not disturb</Label>
+                <Switch checked={doNotDisturb} onCheckedChange={(value) => handleADHDSettingChange('disturb', value)} />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label className="text-[12px]">Celebrate completions</Label>
+                <Switch checked={celebrateCompletions} onCheckedChange={(value) => handleADHDSettingChange('celebrate', value)} />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label className="text-[12px]">Pomodoro timer</Label>
+                <Switch checked={pomodoroEnabled} onCheckedChange={(value) => handleADHDSettingChange('pomodoro', value)} />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+          {/* Tag Management */}
+          <AccordionItem value="tag-management">
+            <AccordionTrigger className="flex items-center gap-2 text-[15px] font-medium text-[#313131]">
+              <Tags className="w-4 h-4 text-[#3300ff]" />
+              Tag Management
+            </AccordionTrigger>
+            <AccordionContent className="space-y-4 p-4">
+              <Button
+                onClick={() => setIsTagManagerOpen(true)}
+                variant="outline"
+                className="w-full justify-start"
+              >
+                <Tags className="w-4 h-4 mr-2" />
+                Manage tags ({availableTags.length})
               </Button>
             </AccordionContent>
           </AccordionItem>
-
-          {/* About */}
-          <AccordionItem value="about" className="px-6 border-none">
-            <AccordionTrigger className="py-4 hover:no-underline">
-              <div className="flex items-center gap-3">
-                <Info className="w-4 h-4 text-[#3300ff]" />
-                <span className="font-['DM_Sans:Medium',_sans-serif] text-[14px] text-[#313131]">
-                  About
-                </span>
-              </div>
+          {/* Theme */}
+          <AccordionItem value="theme">
+            <AccordionTrigger className="flex items-center gap-2 text-[15px] font-medium text-[#313131]">
+              <Palette className="w-4 h-4 text-[#3300ff]" />
+              Theme
             </AccordionTrigger>
-            <AccordionContent className="pb-4 space-y-3">
-              <div className="space-y-1 text-[12px] text-[#828282]">
-                <p className="text-[#313131] font-medium">Task Manager v1.4.0</p>
-                <p>Built with React & Tailwind CSS</p>
+            <AccordionContent className="space-y-4 p-4">
+              <Select value={theme} onValueChange={handleThemeChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="light">Light</SelectItem>
+                  <SelectItem value="dark">Dark</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
+                </SelectContent>
+              </Select>
+            </AccordionContent>
+          </AccordionItem>
+          {/* Data & Privacy */}
+          <AccordionItem value="data-privacy">
+            <AccordionTrigger className="flex items-center gap-2 text-[15px] font-medium text-[#313131]">
+              <Shield className="w-4 h-4 text-[#3300ff]" />
+              Data & Privacy
+            </AccordionTrigger>
+            <AccordionContent className="space-y-4 p-4">
+              <div className="flex items-center justify-between">
+                <Label className="text-[12px]">Data sharing</Label>
+                <Switch checked={dataSharing} onCheckedChange={(value) => handlePrivacyChange('data', value)} />
               </div>
-              
-              <Separator />
-              
-              <div className="space-y-2">
-                <Button variant="ghost" className="w-full justify-start h-9 text-[13px] text-[#313131]" onClick={handlePrivacyPolicy}>
-                  Privacy Policy
-                </Button>
-                <Button variant="ghost" className="w-full justify-start h-9 text-[13px] text-[#313131]" onClick={handleTermsOfService}>
-                  Terms of Service
-                </Button>
-                <Button variant="ghost" className="w-full justify-start h-9 text-[13px] text-[#313131]" onClick={handleHelpSupport}>
-                  Help & Support
-                </Button>
+              <div className="flex items-center justify-between">
+                <Label className="text-[12px]">Analytics</Label>
+                <Switch checked={analytics} onCheckedChange={(value) => handlePrivacyChange('analytics', value)} />
               </div>
-              
-              <Separator />
-              
-              <p className="text-[11px] text-[#828282] text-center pt-2">
-                © 2025 Task Manager. All rights reserved.
-              </p>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
+        
+        {/* Status Indicator */}
+        <div className="text-center text-sm text-gray-500 mb-3 mt-6">
+          Status: {settingsStatus}
+        </div>
+        
+        {/* Debug Info - Remove in production */}
+        <div className="text-xs text-gray-400 mb-2 p-2 bg-gray-50 rounded">
+          <div>Push: {pushNotifications ? 'ON' : 'OFF'}</div>
+          <div>Email: {emailNotifications ? 'ON' : 'OFF'}</div>
+          <div>Focus: {focusMode ? 'ON' : 'OFF'}</div>
+          <div>Calm: {visualCalmMode ? 'ON' : 'OFF'}</div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="space-y-3">
+          <Button onClick={handleSave} className="w-full">
+            Save Settings
+          </Button>
+          <Button onClick={handleReset} variant="outline" className="w-full">
+            Reset to Defaults
+          </Button>
+        </div>
       </div>
 
       {/* Tag Manager Modal */}
-      {onAddTag && onEditTag && onDeleteTag && (
+      {isTagManagerOpen && (
         <TagManager
           isOpen={isTagManagerOpen}
-          onClose={() => setIsTagManagerOpen(false)}
           tags={availableTags}
-          onAddTag={onAddTag}
-          onEditTag={onEditTag}
-          onDeleteTag={onDeleteTag}
+          onAddTag={onAddTag || (() => {})}
+          onEditTag={onEditTag || (() => {})}
+          onDeleteTag={onDeleteTag || (() => {})}
+          onClose={() => setIsTagManagerOpen(false)}
         />
       )}
     </div>

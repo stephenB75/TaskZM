@@ -52,12 +52,12 @@ interface TaskCardProps {
 function Tag({ tag }: { tag: Tag }) {
   return (
     <div
-      className="box-border content-stretch flex gap-[2px] items-center px-[5px] py-[2px] relative rounded-[3px] shrink-0"
+      className="box-border content-stretch flex gap-0 items-center px-[2px] py-[1px] relative rounded-[3px] shrink-0"
       style={{ backgroundColor: tag.bgColor }}
       data-name="Tag"
     >
       <p
-        className={`font-['DM_Sans:${tag.fontWeight === "bold" ? "Bold" : "Medium"}',_sans-serif] leading-[11px] relative shrink-0 text-[9px] text-nowrap whitespace-pre`}
+        className={`font-['DM_Sans:${tag.fontWeight === "bold" ? "Bold" : "Medium"}',_sans-serif] leading-[10px] relative shrink-0 text-[8px] text-nowrap whitespace-pre`}
         style={{
           color: tag.textColor,
           fontWeight:
@@ -101,7 +101,7 @@ function Priority({
 
   return (
     <div
-      className="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] border shrink-0"
+      className="flex items-center gap-0.5 px-0.5 py-0.5 rounded text-[8px] border shrink-0"
       style={{
         backgroundColor: config.bgColor,
         color: config.textColor,
@@ -337,7 +337,7 @@ export default function TaskCard({
 
   return (
     <div
-      className="bg-white box-border content-stretch flex flex-col gap-3 items-start p-3 relative rounded-lg shrink-0 w-[236px] cursor-pointer hover:shadow-lg transition-shadow touch-feedback ios-touch-target android-touch-target mobile-card mobile-transition"
+      className="bg-white box-border content-stretch flex flex-col gap-1 items-start p-1 relative rounded-lg shrink-0 w-[236px] cursor-pointer hover:shadow-lg transition-shadow touch-feedback ios-touch-target android-touch-target mobile-card mobile-transition"
       data-name="Card"
       onClick={() => onTaskClick?.(task.id)}
     >
@@ -349,10 +349,10 @@ export default function TaskCard({
       {/* Mark as Done Checkbox */}
       <button
         onClick={handleMarkDone}
-        className={`absolute top-1.5 right-1.5 z-10 flex items-center justify-center rounded-full transition-all ${
+        className={`absolute top-1 right-1 z-10 flex items-center justify-center rounded-full transition-all ${
           task.status === "done"
-            ? "bg-[#00c851] w-4 h-4"
-            : "border-2 border-[#d0d0d0] hover:border-[#00c851] w-4 h-4 hover:bg-[#f0fdf4]"
+            ? "bg-[#00c851] w-3 h-3"
+            : "border-2 border-[#d0d0d0] hover:border-[#00c851] w-3 h-3 hover:bg-[#f0fdf4]"
         }`}
         title={
           task.status === "done"
@@ -367,7 +367,7 @@ export default function TaskCard({
       >
         {task.status === "done" && (
           <Check
-            className="w-3 h-3 text-white"
+            className="w-2 h-2 text-white"
             strokeWidth={3}
           />
         )}
@@ -375,7 +375,7 @@ export default function TaskCard({
 
       {/* Tags */}
       <div
-        className="content-start flex flex-wrap gap-[4px] items-start relative shrink-0 w-full"
+        className="content-start flex flex-wrap gap-0 items-start relative shrink-0 w-full"
         data-name="Tags"
       >
         {task.tags.map((tag, index) => (
@@ -434,11 +434,11 @@ export default function TaskCard({
 
       {/* Title */}
       <div
-        className="content-stretch flex gap-[3px] items-start relative shrink-0 w-full"
+        className="content-stretch flex gap-0 items-start relative shrink-0 w-full"
         data-name="Title"
       >
         <p
-          className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[16px] relative shrink-0 text-[#313131] text-[13px] w-full"
+          className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[14px] relative shrink-0 text-[#313131] text-[12px] w-full"
           style={{ fontVariationSettings: "'opsz' 14" }}
         >
           {task.title}
@@ -447,7 +447,7 @@ export default function TaskCard({
 
       {/* Description */}
       <p
-        className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] relative shrink-0 text-[#828282] text-[10px] w-full"
+        className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[12px] relative shrink-0 text-[#828282] text-[9px] w-full"
         style={{ fontVariationSettings: "'opsz' 14" }}
       >
         {task.description}
@@ -456,7 +456,7 @@ export default function TaskCard({
       {/* Links */}
       {task.links && task.links.length > 0 && (
         <div
-          className="content-start flex flex-wrap gap-[6px] items-start relative shrink-0 w-full"
+          className="content-start flex flex-wrap gap-[4px] items-start relative shrink-0 w-full"
           data-name="Links"
         >
           {task.links.map((link, index) => (
@@ -466,13 +466,13 @@ export default function TaskCard({
                 e.stopPropagation();
                 window.open(link.url, "_blank");
               }}
-              className="content-stretch flex gap-[2px] items-start relative shrink-0 hover:bg-gray-50 rounded p-0.5 -m-0.5 transition-colors"
+              className="content-stretch flex gap-[1px] items-start relative shrink-0 hover:bg-gray-50 rounded p-0.5 -m-0.5 transition-colors"
               data-name="URL"
               title={`Open ${link.url}`}
             >
               <TablerIconLink />
               <p
-                className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] relative shrink-0 text-[#313131] text-[10px] text-nowrap whitespace-pre hover:text-[#3300ff]"
+                className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[12px] relative shrink-0 text-[#313131] text-[9px] text-nowrap whitespace-pre hover:text-[#3300ff]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
                 {link.text}
@@ -485,7 +485,7 @@ export default function TaskCard({
       {/* Files */}
       {task.files && task.files.length > 0 && (
         <div
-          className="content-start flex flex-wrap gap-[6px] items-start relative shrink-0 w-full"
+          className="content-start flex flex-wrap gap-[4px] items-start relative shrink-0 w-full"
           data-name="Files"
         >
           {task.files.map((file, index) => (
@@ -496,7 +496,7 @@ export default function TaskCard({
                 // Future: Could download or open file
                 console.log("File clicked:", file.name);
               }}
-              className="content-stretch flex gap-[2px] items-start relative shrink-0 hover:bg-gray-50 rounded p-0.5 -m-0.5 transition-colors"
+              className="content-stretch flex gap-[1px] items-start relative shrink-0 hover:bg-gray-50 rounded p-0.5 -m-0.5 transition-colors"
               data-name="File"
               title={`Open ${file.name}`}
             >
@@ -516,7 +516,7 @@ export default function TaskCard({
                 </div>
               </div>
               <p
-                className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] relative shrink-0 text-[#313131] text-[10px] text-nowrap whitespace-pre hover:text-[#3300ff]"
+                className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[12px] relative shrink-0 text-[#313131] text-[9px] text-nowrap whitespace-pre hover:text-[#3300ff]"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
                 {file.name}
@@ -529,17 +529,17 @@ export default function TaskCard({
       {/* Notes */}
       {task.notes && (
         <div
-          className="content-stretch flex flex-col gap-[2px] items-start relative shrink-0 w-full"
+          className="content-stretch flex flex-col gap-0 items-start relative shrink-0 w-full"
           data-name="Notes"
         >
           <p
-            className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[11px] relative shrink-0 text-[#828282] text-[9px] w-full"
+            className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[10px] relative shrink-0 text-[#828282] text-[8px] w-full"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             Notes:
           </p>
           <p
-            className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] relative shrink-0 text-[#313131] text-[10px] w-full"
+            className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[12px] relative shrink-0 text-[#313131] text-[9px] w-full"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             {task.notes}
@@ -550,23 +550,23 @@ export default function TaskCard({
       {/* Subtasks */}
       {task.subtasks && task.subtasks.length > 0 && (
         <div
-          className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full"
+          className="content-stretch flex flex-col gap-0 items-start relative shrink-0 w-full"
           data-name="Subtasks"
         >
           <p
-            className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[11px] relative shrink-0 text-[#828282] text-[9px] w-full"
+            className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[10px] relative shrink-0 text-[#828282] text-[8px] w-full"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             Subtasks ({task.subtasks.filter(st => st.completed).length}/{task.subtasks.length}):
           </p>
-          <div className="flex flex-col gap-[2px] w-full">
+          <div className="flex flex-col gap-0 w-full">
             {task.subtasks.slice(0, 3).map((subtask) => (
               <div
                 key={subtask.id}
-                className="flex items-center gap-2 w-full"
+                className="flex items-center gap-1 w-full"
               >
                 <div
-                  className={`w-3 h-3 rounded border-2 flex items-center justify-center shrink-0 ${
+                  className={`w-2.5 h-2.5 rounded border-2 flex items-center justify-center shrink-0 ${
                     subtask.completed
                       ? "bg-[#00c851] border-[#00c851]"
                       : "border-[#d0d0d0]"
@@ -574,13 +574,13 @@ export default function TaskCard({
                 >
                   {subtask.completed && (
                     <Check
-                      className="w-2 h-2 text-white"
+                      className="w-1.5 h-1.5 text-white"
                       strokeWidth={3}
                     />
                   )}
                 </div>
                 <p
-                  className={`font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] relative shrink-0 text-[10px] w-full ${
+                  className={`font-['DM_Sans:Regular',_sans-serif] font-normal leading-[12px] relative shrink-0 text-[9px] w-full ${
                     subtask.completed ? "line-through text-[#828282]" : "text-[#313131]"
                   }`}
                   style={{ fontVariationSettings: "'opsz' 14" }}
@@ -591,7 +591,7 @@ export default function TaskCard({
             ))}
             {task.subtasks.length > 3 && (
               <p
-                className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] relative shrink-0 text-[#828282] text-[9px] w-full"
+                className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[12px] relative shrink-0 text-[#828282] text-[8px] w-full"
                 style={{ fontVariationSettings: "'opsz' 14" }}
               >
                 +{task.subtasks.length - 3} more...
@@ -649,13 +649,13 @@ export default function TaskCard({
 
       {/* Time Tracking */}
       <div
-        className="content-stretch flex flex-col gap-[4px] items-start relative shrink-0 w-full"
+        className="content-stretch flex flex-col gap-0 items-start relative shrink-0 w-full"
         data-name="TimeTracking"
       >
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-1">
-            <Clock className="w-3 h-3 text-gray-500" />
-            <span className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[11px] text-[#828282] text-[9px]">
+            <Clock className="w-2.5 h-2.5 text-gray-500" />
+            <span className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[10px] text-[#828282] text-[8px]">
               Time:
             </span>
             <Badge variant="secondary" className="text-xs">
@@ -669,10 +669,10 @@ export default function TaskCard({
                 variant="ghost"
                 size="sm"
                 onClick={handleStartTimer}
-                className="h-6 w-6 p-0 hover:bg-green-100"
+                className="h-5 w-5 p-0 hover:bg-green-100"
                 title="Start timer"
               >
-                <Play className="w-3 h-3 text-green-600" />
+                <Play className="w-2.5 h-2.5 text-green-600" />
               </Button>
             ) : (
               <div className="flex items-center gap-1">
@@ -680,19 +680,19 @@ export default function TaskCard({
                   variant="ghost"
                   size="sm"
                   onClick={handlePauseTimer}
-                  className="h-6 w-6 p-0 hover:bg-yellow-100"
+                  className="h-5 w-5 p-0 hover:bg-yellow-100"
                   title="Pause timer"
                 >
-                  <Pause className="w-3 h-3 text-yellow-600" />
+                  <Pause className="w-2.5 h-2.5 text-yellow-600" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleStopTimer}
-                  className="h-6 w-6 p-0 hover:bg-red-100"
+                  className="h-5 w-5 p-0 hover:bg-red-100"
                   title="Stop timer"
                 >
-                  <Square className="w-3 h-3 text-red-600" />
+                  <Square className="w-2.5 h-2.5 text-red-600" />
                 </Button>
               </div>
             )}
@@ -701,8 +701,8 @@ export default function TaskCard({
         
         {isTracking && (
           <div className="flex items-center gap-1 w-full">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] text-[#00c851] text-[9px]">
+            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[12px] text-[#00c851] text-[8px]">
               Live: {formatDuration(currentSessionTime)}
             </span>
           </div>
@@ -711,7 +711,7 @@ export default function TaskCard({
 
       {/* Status Bar */}
       <div
-        className="absolute h-[32px] left-[-1px] rounded-[12080.3px] top-[28px] w-[2.5px]"
+        className="absolute h-[24px] left-[-1px] rounded-[12080.3px] top-[20px] w-[2px]"
         style={{ backgroundColor: getStatusColor(task.status) }}
       />
     </div>

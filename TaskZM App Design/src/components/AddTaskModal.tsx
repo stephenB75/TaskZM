@@ -434,10 +434,12 @@ export default function AddTaskModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-2xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto p-3 sm:p-6">
         <DialogHeader className="pb-2 sm:pb-4">
-          <DialogTitle className="text-[18px] sm:text-[24px] font-bold text-[#313131] pr-6">
+          <DialogTitle className="font-['DM_Sans:Medium',_sans-serif] font-medium leading-[20px] relative shrink-0 text-[#313131] text-[18px] sm:text-[24px] pr-6"
+                       style={{ fontVariationSettings: "'opsz' 14" }}>
             {editingTask ? "Edit Task" : "Add Task"}
           </DialogTitle>
-          <DialogDescription className="text-[#828282] text-xs sm:text-sm hidden sm:block">
+          <DialogDescription className="font-['DM_Sans:Regular',_sans-serif] font-normal leading-[13px] relative shrink-0 text-[#828282] text-[10px] sm:text-[13px] hidden sm:block"
+                             style={{ fontVariationSettings: "'opsz' 14" }}>
             {editingTask
               ? "Update task details and schedule"
               : "Create a new task with all necessary details and schedule it for a specific day"}

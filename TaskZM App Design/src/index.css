@@ -7,6 +7,72 @@ body {
   font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Typography Enhancements */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.text-heading {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.text-subheading {
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+.text-body {
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.text-caption {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+/* Enhanced Button Styles */
+.btn-enhanced {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+.btn-enhanced:hover {
+  @apply shadow-sm transform scale-[0.98];
+}
+
+.btn-enhanced:active {
+  @apply transform scale-[0.96];
+}
+
+.btn-outline-enhanced {
+  @apply border-gray-300 hover:border-[#3300ff] hover:text-[#3300ff] focus:ring-2 focus:ring-[#3300ff]/20;
+}
+
+.btn-primary-enhanced {
+  @apply bg-[#3300ff] hover:bg-[#2200cc] focus:ring-2 focus:ring-[#3300ff]/20;
+}
+
+/* Subtle Primary Blue Accents */
+.focus-primary {
+  @apply focus:ring-2 focus:ring-[#3300ff]/20 focus:border-[#3300ff];
+}
+
+.hover-primary {
+  @apply hover:text-[#3300ff] hover:border-[#3300ff];
+}
+
+.accent-primary {
+  @apply text-[#3300ff];
+}
+
+.bg-primary-subtle {
+  @apply bg-[#3300ff]/5;
+}
+
 /* Custom scrollbar styles */
 ::-webkit-scrollbar {
   width: 8px;

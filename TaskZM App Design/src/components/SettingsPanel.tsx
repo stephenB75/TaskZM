@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Calendar, Sparkles, Bell, Info, CreditCard, Clock, RotateCcw, Briefcase, Tags } from 'lucide-react';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
@@ -317,13 +317,13 @@ export default function SettingsPanel({
   };
 
   return (
-    <div className="w-full md:w-[380px] h-screen flex-shrink-0 bg-[#e9f7e9] md:border-l border-[#e3e3e3] flex flex-col">
+    <div className="w-full md:w-[400px] h-screen flex-shrink-0 bg-[#e9f7e9] md:border-l border-[#e3e3e3] flex flex-col">
       {/* Header */}
       <div className="px-6 py-5 border-b border-[#e3e3e3]">
-        <h2 className="font-['DM_Sans:Bold',_sans-serif] text-[18px] text-[#313131]">
+        <h2 className="font-['DM_Sans:Bold',_sans-serif] text-[20px] text-[#313131] text-heading">
           Settings
         </h2>
-        <p className="text-[12px] text-[#828282] mt-1">
+        <p className="text-[12px] text-[#828282] mt-1 text-caption">
           Customize your task manager
         </p>
       </div>

@@ -1,3 +1,4 @@
+import React from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -91,7 +92,7 @@ export default function WeekNavigation({
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <span
-            className="font-['DM_Sans:Medium',_sans-serif] font-medium text-[16px] text-[#313131]"
+            className="font-['DM_Sans:Medium',_sans-serif] font-semibold text-[18px] text-[#313131] text-heading"
             style={{ fontVariationSettings: "'opsz' 14" }}
           >
             {formatWeekRange(currentWeek)}
@@ -104,7 +105,7 @@ export default function WeekNavigation({
             title="Go to Current Week"
           >
             <span
-              className="font-['DM_Sans:Medium',_sans-serif] font-medium text-[14px]"
+              className="font-['DM_Sans:Medium',_sans-serif] font-medium text-[14px] text-subheading"
               style={{ fontVariationSettings: "'opsz' 14" }}
             >
               Today
@@ -121,7 +122,7 @@ export default function WeekNavigation({
           >
             <Sparkles className="w-5 h-5" />
             <span
-              className="font-['DM_Sans:Medium',_sans-serif] font-medium text-[14px]"
+              className="font-['DM_Sans:Medium',_sans-serif] font-medium text-[14px] text-subheading"
               style={{ fontVariationSettings: "'opsz' 14" }}
             >
               {isScheduling ? "Scheduling..." : "AI Schedule"}
